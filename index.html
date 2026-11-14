@@ -71,6 +71,32 @@ svg{flex:none}
 #ly .chip[aria-pressed=true]{background:var(--fg);color:#12191a;border-color:transparent;text-shadow:none}
 #ly .hint{margin-top:10px;color:var(--mute)}
 #ly .hint .btn{margin-top:7px;padding:5px 11px;font-size:12px}
+#ly{width:340px;display:flex;flex-direction:column;max-height:min(660px,calc(100% - 40px));padding:12px 12px 10px}
+#ly .lyhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#ly h3{margin:0}
+#ly .xb{width:24px;height:24px}
+#lyQ,#ly select{width:100%;min-width:0;box-sizing:border-box;background:#00000059;border:1px solid var(--line);border-radius:10px;color:var(--fg);font:500 13px Inter,sans-serif;padding:7px 10px;outline:0}
+#lyQ:focus,#ly select:focus{border-color:#ffffff59}
+#lyQ::placeholder{color:var(--mute)}
+#ly select{appearance:none;-webkit-appearance:none;padding-right:24px;font-size:12px;text-overflow:ellipsis;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23bcc8c4' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+#ly select option{background:#12233b;color:#f3f1e8}
+.lysel{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 8px}
+.lyso{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--mute)}
+.lyso span{flex:none}
+.lyst{display:flex;align-items:center;justify-content:space-between;margin:9px 2px 4px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.lyst .lnk{color:var(--sun);padding:0}
+#lyL{flex:1 1 auto;min-height:64px;overflow:auto;margin:0 -6px;padding:0 2px}
+.lyr{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;color:inherit;text-align:left;padding:6px;border-radius:9px;cursor:pointer;font-size:13px}
+.lyr:hover{background:#ffffff14}
+.lyr>span{min-width:0;flex:1}
+.lyr b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lyr small{display:block;color:var(--mute);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lyr em{flex:none;font-style:normal;font-size:11px;color:var(--sun)}
+.lyr em.en{color:var(--mute);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+.lyno{padding:14px 6px;color:var(--mute)}
+.lylg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--mute)}
+.lylg span{display:inline-flex;align-items:center;gap:5px}
+#lyBtn.act{background:var(--grad);color:#1b1416}
 #live i{width:8px;height:8px;border-radius:50%;background:var(--rose);animation:beat 1.4s infinite}
 #live b{font-family:"Space Grotesk",sans-serif}
 
@@ -232,7 +258,8 @@ body.playing #feed{flex:1 1 auto}
  #side{left:8px;right:8px;bottom:8px;top:auto;width:auto;max-height:58vh;border-radius:18px}
  .leaflet-control-zoom,.leaflet-control-attribution{display:none}
  #lyBtn{left:auto;bottom:auto;right:10px;top:12px}
- #ly{left:auto;bottom:auto;right:10px;top:54px;max-height:46vh;overflow:auto}
+ #ly{left:8px;right:8px;bottom:auto;top:54px;width:auto;max-width:none;max-height:50vh;overflow:hidden}
+ .lylg{display:none}
  /* Su telefono, mentre un video e' aperto, lo spazio va al video e agli zip: note e crediti tornano alla chiusura. */
  body.playing .foot{display:none}
  /* Benvenuto su telefono: domande e argomenti su una riga che scorre di lato, cosi' la mappa resta grande. */
@@ -448,8 +475,8 @@ var DICT={
 });
 // Testi dell'interfaccia. Per aggiungere una lingua basta un altro blocco.
 var T={
- en:{layers:'Map layers',lgZ:'Places with zips',lgV:'Verified places',lgU:'Unverified places',onlyZ:'Only places with zips',allCats:'All',other:'Other',zoomIn:'Places appear when you zoom in.',showPl:'Show the places',shared:'Here is the zip you were sent.',upIn:'Next zip in {s}',upNow:'Play now',upNo:'Cancel',topT:'Topics',stats:'{z} zips from {v} videos \u00b7 {p} places on the map',cd:'GTA 6 is out in {d} days',cd1:'GTA 6 is out tomorrow',cd0:'GTA 6 is out today',sgQ:'Question',sgP:'Place',sgT:'Topic',sgZ:'{c} zips',official:'Official',ttl:'ZipTube: the GTA 6 map that plays the right minute',name:'English',loc:'en-US',claim:'Right info. Zipped.',heroT:'What are you looking for in Leonida?',heroP:'Ask in your own words or tap a place on the map.',ph:'Ask about places, missions, tips...',lang:'Language',follow:'Map follows the video',dFollow:'Moves to the places the video talks about',dShield:'Blurs previews that may reveal the story',copy:'Copy link to this zip',copied:'Link copied',shield:'Spoiler shield',tour:'Take me on a tour of Leonida',info:'Info and credits',by:'An AXIX\u00ae product',aiT:'AI-found minutes',closeV:'Close video',more:'More options',send:'Send',plus:' and subtitles',newc:'New chat',live:'Live: the map is dynamic and follows what the video covers:',z1:' zip',zn:' zips',sorted:', sorted by helpfulness',start:'Start here',startSub:'Full tours of Leonida: the map travels with the video',none:'No zip answers this yet. Try one of these:',spot:'{n}{s} is here on the map.',spotZ:'These zips are about {r}.',spotD:'{c} zips are about this very place.',spotD1:'One zip is about this very place.',zipsN:'{c} zips about this place',zips1:'1 zip about this place',unv:'Unverified information',rw:'In real life: {w}',cat:{landmark:'Landmark',hotel:'Hotel',restaurant:'Restaurant',leisure:'Leisure',events:'Events',retail:'Shop',transportation:'Transport',government:'Government',public:'Public building',natural:'Nature',industrial:'Industrial',utilities:'Utilities',office:'Offices',residential:'Residential'},found:'Found {n}{p}. Playing the most helpful one.',on:' about ',tourT:'Tour of Leonida',places:' places',from:'from ',lasts:'lasts ',views:' views',hid:'Title hidden by the shield',my1:'Helpful for you',my0:'Not helpful for you',fbq:'Did it help?',yes:'Yes',no:'No',lo:'Original audio in English',ld:'English subtitles on \u00b7 English audio in \u2699 \u203a Audio track',ls:'English subtitles, translated by YouTube',ln:'Translations into English are not available for this video.',to:'EN',td:'EN subs + audio',ts:'EN subs',tn:'Original language only',foot:'ZipTube is an AXIX\u00ae product. Unofficial site, not affiliated with Rockstar Games or Take-Two. Videos stay on YouTube and belong to their creators. Order: share of helpful votes, then views. Votes are anonymous. Questions are logged without personal data, to decide which videos to add.',footMap:' The map is a community reconstruction (YANIS v17, GTADB, CC BY 4.0), not an official map.',cTitle:'Before you start',cText:'ZipTube plays the right piece of YouTube videos, inside the site. To do so it loads previews and videos from YouTube (Google), which may use cookies. Without them you still find the zips and open them on YouTube. By using ZipTube you accept the Terms of use and the Privacy notice.',cYes:'Accept YouTube videos',cNo:'Only what is necessary',cMore:'Privacy, cookies and terms',legal:'Privacy and terms',prefsL:'Cookie settings',ytNeed:'To watch this video here, turn on YouTube videos. YouTube (Google) may use cookies.',ytOn:'Turn on YouTube videos',ytOpen:'Or open it on YouTube at ',pNec:'Necessary storage',pNecD:'Language, settings, your votes. Always on',pYt:'YouTube videos and previews',pYtD:'Loaded from Google servers, which may use cookies',pCode:'Your anonymous code for votes: ',pNoCode:'none yet, it is created at your first vote',pDel:'Delete my data',pDone:'Done: votes and code deleted from this device and from our database.',closeL:'Close',priv:'Privacy and cookies',privT:'ZipTube uses no cookies of its own, no advertising and no tracking tools. Your device only keeps your language, your settings, your votes and a random anonymous code used to count each vote once. Votes and the text of questions are recorded anonymously to improve the answers: please do not write personal data in your questions. Videos and previews come from YouTube (Google): when you start a video, YouTube receives your IP address and may use its own cookies under its own rules. Data controller: AXIX.',ft:'The video cannot play here.',fbody:'YouTube blocks playback in pages opened with a double click. Close this page and open ZipTube with the file "Apri ZipTube.command".',fl:'Meanwhile, open it on YouTube from minute '},
- it:{layers:'Livelli della mappa',lgZ:'Luoghi con zip',lgV:'Luoghi verificati',lgU:'Luoghi non verificati',onlyZ:'Solo luoghi con zip',allCats:'Tutti',other:'Altro',zoomIn:'I luoghi compaiono avvicinando la mappa.',showPl:'Mostra i luoghi',shared:'Ecco lo zip che ti hanno mandato.',upIn:'Prossimo zip tra {s}',upNow:'Guarda ora',upNo:'Annulla',topT:'Argomenti',stats:'{z} zip da {v} video \u00b7 {p} luoghi sulla mappa',cd:'GTA 6 esce tra {d} giorni',cd1:'GTA 6 esce domani',cd0:'GTA 6 esce oggi',sgQ:'Domanda',sgP:'Luogo',sgT:'Argomento',sgZ:'{c} zip',official:'Ufficiale',ttl:'ZipTube: la mappa di GTA 6 che fa partire il minuto giusto',name:'Italiano',loc:'it-IT',claim:'Right info. Zipped.',heroT:'Cosa cerchi a Leonida?',heroP:'Chiedi con parole tue o tocca un luogo sulla mappa.',ph:'Chiedi di luoghi, missioni, trucchi...',lang:'Lingua',follow:'La mappa segue il video',dFollow:'Si sposta sui luoghi di cui parla il video',dShield:'Sfoca le anteprime che possono svelare la trama',copy:'Copia il link a questo zip',copied:'Link copiato',shield:'Scudo anti-spoiler',tour:'Fammi fare il giro di Leonida',info:'Info e crediti',by:'Un prodotto AXIX\u00ae',aiT:'minuti trovati da AI',closeV:'Chiudi video',more:'Altre opzioni',send:'Invia',plus:' e sottotitoli',newc:'Nuova chat',live:'Live: La mappa è dinamica e segue i contenuti del video:',z1:' zip',zn:' zip',sorted:', in ordine di utilità',start:'Inizia da qui',startSub:'Giri completi di Leonida: la mappa viaggia con il video',none:'Nessuno zip risponde ancora a questo. Prova con una di queste:',spot:'{n}{s} \u00e8 qui sulla mappa.',spotZ:'Questi zip parlano di {r}.',spotD:'{c} zip parlano proprio di questo luogo.',spotD1:'Uno zip parla proprio di questo luogo.',zipsN:'{c} zip su questo luogo',zips1:'1 zip su questo luogo',unv:'Informazione non verificata',rw:'Nella realt\u00e0: {w}',cat:{landmark:'Punto di riferimento',hotel:'Hotel',restaurant:'Ristorante',leisure:'Svago',events:'Eventi',retail:'Negozio',transportation:'Trasporti',government:'Edificio governativo',public:'Edificio pubblico',natural:'Natura',industrial:'Zona industriale',utilities:'Servizi',office:'Uffici',residential:'Residenziale'},found:'Ho trovato {n}{p}. Parte il più utile.',on:' su ',tourT:'Giro di Leonida',places:' luoghi',from:'dal minuto ',lasts:'dura ',views:' visual.',hid:'Titolo nascosto dallo scudo',my1:'Ti ha aiutato',my0:'Non ti ha aiutato',fbq:'Ti ha aiutato?',yes:'Sì',no:'No',lo:'Audio originale in italiano',ld:'Sottotitoli in italiano attivi \u00b7 audio italiano in \u2699 \u203a Traccia audio',ls:'Sottotitoli in italiano, tradotti da YouTube',ln:'Per questo video le traduzioni in italiano non sono disponibili.',to:'IT',td:'Sottotitoli + audio IT',ts:'Sottotitoli IT',tn:'Solo lingua originale',foot:'ZipTube \u00e8 un prodotto AXIX\u00ae. Sito non ufficiale, non affiliato a Rockstar Games o Take-Two. I video restano su YouTube e sono dei rispettivi creatori. Ordine: quota di voti utili, poi visualizzazioni. I voti sono anonimi. Le domande vengono registrate senza dati personali, per decidere quali video aggiungere.',footMap:' La mappa \u00e8 una ricostruzione della comunit\u00e0 (YANIS v17, GTADB, CC BY 4.0), non una mappa ufficiale.',cTitle:'Prima di iniziare',cText:'ZipTube ti fa vedere il pezzo giusto dei video di YouTube, dentro il sito. Per farlo carica anteprime e video da YouTube (Google), che pu\u00f2 usare cookie. Senza, trovi comunque gli zip e li apri su YouTube. Usando ZipTube accetti i Termini d\u2019uso e l\u2019Informativa privacy.',cYes:'Accetta i video di YouTube',cNo:'Solo il necessario',cMore:'Privacy, cookie e termini',legal:'Privacy e termini',prefsL:'Preferenze cookie',ytNeed:'Per vedere questo video qui, attiva i video di YouTube. YouTube (Google) pu\u00f2 usare cookie.',ytOn:'Attiva i video di YouTube',ytOpen:'Oppure aprilo su YouTube al minuto ',pNec:'Memoria necessaria',pNecD:'Lingua, impostazioni, i tuoi voti. Sempre attiva',pYt:'Video e anteprime di YouTube',pYtD:'Caricati dai server di Google, che pu\u00f2 usare cookie',pCode:'Il tuo codice anonimo per i voti: ',pNoCode:'nessuno, si crea al tuo primo voto',pDel:'Cancella i miei dati',pDone:'Fatto: voti e codice cancellati da questo dispositivo e dalla nostra banca dati.',closeL:'Chiudi',priv:'Privacy e cookie',privT:'ZipTube non usa cookie propri, pubblicit\u00e0 o strumenti di tracciamento. Sul tuo dispositivo restano solo la lingua, le impostazioni, i tuoi voti e un codice casuale anonimo che serve a contare ogni voto una volta sola. I voti e il testo delle domande vengono registrati in forma anonima per migliorare le risposte: non scrivere dati personali nelle domande. Video e anteprime arrivano da YouTube (Google): quando avvii un video, YouTube riceve il tuo indirizzo IP e pu\u00f2 usare i propri cookie secondo le sue regole. Titolare del trattamento: AXIX.',ft:'Qui il video non può partire.',fbody:'YouTube blocca la riproduzione nelle pagine aperte con doppio clic. Chiudi questa pagina e apri ZipTube con il file "Apri ZipTube.command".',fl:'Intanto aprilo su YouTube dal minuto '}
+ en:{lyPh:'Name, street, service...',lyCat:'All categories',lySv:'All services',lySo:'Sort by ',so:{name:'name',area:'area',zips:'most zips',near:'nearest to the map centre',ns:'north to south',we:'west to east',rw:'real-life name'},fZ:'With zips',fE:'Enterable',fV:'Verified',fU:'Unverified',fR:'Real-life match',lyN:'{n} places',lyN1:'1 place',lyReset:'Clear filters',lyMore:'Show more',lyNone:'No place matches.',bld:'Building',ent:'You can go inside',svc:{bus:'Bus stop',gas:'Gas station',supermarket:'Supermarket',train:'Train',marina:'Marina',airport:'Airport',metro:'Metro',fence:'Fence',vendor:'Street vendor',safehouse:'Safehouse',tennis:'Tennis',racetrack:'Racetrack',police:'Police',food:'Food',hospital:'Hospital',guns:'Gun shop',bar:'Bar',hair:'Barber',clothes:'Clothes',stripclub:'Strip club',nightclub:'Nightclub',modshop:'Mod shop',spray:'Pay \'n\' Spray',jail:'Jail',electronics:'Electronics',fastfood:'Fast food',tattoos:'Tattoos',blimp:'Blimp',carwash:'Car wash',airbase:'Air base',ferriswheel:'Ferris wheel',golf:'Golf',liquor:'Liquor store',bikeshop:'Bike shop',shoes:'Shoes',gym:'Gym',cinema:'Cinema',volleyball:'Beach volleyball',pharmacy:'Pharmacy'},layers:'Places on the map',lgZ:'Places with zips',lgV:'Verified places',lgU:'Unverified places',onlyZ:'Only places with zips',allCats:'All',other:'Other',zoomIn:'Places appear when you zoom in.',showPl:'Show the places',shared:'Here is the zip you were sent.',upIn:'Next zip in {s}',upNow:'Play now',upNo:'Cancel',topT:'Topics',stats:'{z} zips from {v} videos \u00b7 {p} places on the map',cd:'GTA 6 is out in {d} days',cd1:'GTA 6 is out tomorrow',cd0:'GTA 6 is out today',sgQ:'Question',sgP:'Place',sgT:'Topic',sgF:'Places',sgZ:'{c} zips',official:'Official',ttl:'ZipTube: the GTA 6 map that plays the right minute',name:'English',loc:'en-US',claim:'Right info. Zipped.',heroT:'What are you looking for in Leonida?',heroP:'Ask in your own words or tap a place on the map.',ph:'Ask about places, missions, tips...',lang:'Language',follow:'Map follows the video',dFollow:'Moves to the places the video talks about',dShield:'Blurs previews that may reveal the story',copy:'Copy link to this zip',copied:'Link copied',shield:'Spoiler shield',tour:'Take me on a tour of Leonida',info:'Info and credits',by:'An AXIX\u00ae product',aiT:'AI-found minutes',closeV:'Close video',more:'More options',send:'Send',plus:' and subtitles',newc:'New chat',live:'Live: the map is dynamic and follows what the video covers:',z1:' zip',zn:' zips',sorted:', sorted by helpfulness',start:'Start here',startSub:'Full tours of Leonida: the map travels with the video',none:'No zip answers this yet. Try one of these:',spot:'{n}{s} is here on the map.',spotZ:'These zips are about {r}.',spotD:'{c} zips are about this very place.',spotD1:'One zip is about this very place.',zipsN:'{c} zips about this place',zips1:'1 zip about this place',unv:'Unverified information',rw:'In real life: {w}',cat:{landmark:'Landmark',hotel:'Hotel',restaurant:'Restaurant',leisure:'Leisure',events:'Events',retail:'Shop',transportation:'Transport',government:'Government',public:'Public building',natural:'Nature',industrial:'Industrial',utilities:'Utilities',office:'Offices',residential:'Residential'},found:'Found {n}{p}. Playing the most helpful one.',on:' about ',tourT:'Tour of Leonida',places:' places',from:'from ',lasts:'lasts ',views:' views',hid:'Title hidden by the shield',my1:'Helpful for you',my0:'Not helpful for you',fbq:'Did it help?',yes:'Yes',no:'No',lo:'Original audio in English',ld:'English subtitles on \u00b7 English audio in \u2699 \u203a Audio track',ls:'English subtitles, translated by YouTube',ln:'Translations into English are not available for this video.',to:'EN',td:'EN subs + audio',ts:'EN subs',tn:'Original language only',foot:'ZipTube is an AXIX\u00ae product. Unofficial site, not affiliated with Rockstar Games or Take-Two. Videos stay on YouTube and belong to their creators. Order: share of helpful votes, then views. Votes are anonymous. Questions are logged without personal data, to decide which videos to add.',footMap:' The map is a community reconstruction (YANIS v17, GTADB, CC BY 4.0), not an official map. Places, categories, services and enterable buildings come from GTA VI Landmarks Data (GTADB and contributors, CC BY 4.0, map.gtadb.org), summarised and translated by ZipTube.',cTitle:'Before you start',cText:'ZipTube plays the right piece of YouTube videos, inside the site. To do so it loads previews and videos from YouTube (Google), which may use cookies. Without them you still find the zips and open them on YouTube. By using ZipTube you accept the Terms of use and the Privacy notice.',cYes:'Accept YouTube videos',cNo:'Only what is necessary',cMore:'Privacy, cookies and terms',legal:'Privacy and terms',prefsL:'Cookie settings',ytNeed:'To watch this video here, turn on YouTube videos. YouTube (Google) may use cookies.',ytOn:'Turn on YouTube videos',ytOpen:'Or open it on YouTube at ',pNec:'Necessary storage',pNecD:'Language, settings, your votes. Always on',pYt:'YouTube videos and previews',pYtD:'Loaded from Google servers, which may use cookies',pCode:'Your anonymous code for votes: ',pNoCode:'none yet, it is created at your first vote',pDel:'Delete my data',pDone:'Done: votes and code deleted from this device and from our database.',closeL:'Close',priv:'Privacy and cookies',privT:'ZipTube uses no cookies of its own, no advertising and no tracking tools. Your device only keeps your language, your settings, your votes and a random anonymous code used to count each vote once. Votes and the text of questions are recorded anonymously to improve the answers: please do not write personal data in your questions. Videos and previews come from YouTube (Google): when you start a video, YouTube receives your IP address and may use its own cookies under its own rules. Data controller: AXIX.',ft:'The video cannot play here.',fbody:'YouTube blocks playback in pages opened with a double click. Close this page and open ZipTube with the file "Apri ZipTube.command".',fl:'Meanwhile, open it on YouTube from minute '},
+ it:{lyPh:'Nome, via, servizio...',lyCat:'Tutte le categorie',lySv:'Tutti i servizi',lySo:'Ordina per ',so:{name:'nome',area:'zona',zips:'pi\u00f9 zip',near:'vicinanza al centro della mappa',ns:'da nord a sud',we:'da ovest a est',rw:'nome reale'},fZ:'Con zip',fE:'Si pu\u00f2 entrare',fV:'Verificati',fU:'Non verificati',fR:'Con luogo reale',lyN:'{n} luoghi',lyN1:'1 luogo',lyReset:'Azzera filtri',lyMore:'Mostra altri',lyNone:'Nessun luogo corrisponde.',bld:'Edificio',ent:'Si pu\u00f2 entrare',svc:{bus:'Fermata autobus',gas:'Distributore',supermarket:'Supermercato',train:'Treno',marina:'Porto turistico',airport:'Aeroporto',metro:'Metro',fence:'Ricettatore',vendor:'Venditore ambulante',safehouse:'Rifugio',tennis:'Tennis',racetrack:'Pista',police:'Polizia',food:'Cibo',hospital:'Ospedale',guns:'Armeria',bar:'Bar',hair:'Barbiere',clothes:'Vestiti',stripclub:'Strip club',nightclub:'Discoteca',modshop:'Officina',spray:'Pay \'n\' Spray',jail:'Prigione',electronics:'Elettronica',fastfood:'Fast food',tattoos:'Tatuaggi',blimp:'Dirigibile',carwash:'Autolavaggio',airbase:'Base aerea',ferriswheel:'Ruota panoramica',golf:'Golf',liquor:'Liquori',bikeshop:'Negozio di bici',shoes:'Scarpe',gym:'Palestra',cinema:'Cinema',volleyball:'Beach volley',pharmacy:'Farmacia'},layers:'Luoghi sulla mappa',lgZ:'Luoghi con zip',lgV:'Luoghi verificati',lgU:'Luoghi non verificati',onlyZ:'Solo luoghi con zip',allCats:'Tutti',other:'Altro',zoomIn:'I luoghi compaiono avvicinando la mappa.',showPl:'Mostra i luoghi',shared:'Ecco lo zip che ti hanno mandato.',upIn:'Prossimo zip tra {s}',upNow:'Guarda ora',upNo:'Annulla',topT:'Argomenti',stats:'{z} zip da {v} video \u00b7 {p} luoghi sulla mappa',cd:'GTA 6 esce tra {d} giorni',cd1:'GTA 6 esce domani',cd0:'GTA 6 esce oggi',sgQ:'Domanda',sgP:'Luogo',sgT:'Argomento',sgF:'Luoghi',sgZ:'{c} zip',official:'Ufficiale',ttl:'ZipTube: la mappa di GTA 6 che fa partire il minuto giusto',name:'Italiano',loc:'it-IT',claim:'Right info. Zipped.',heroT:'Cosa cerchi a Leonida?',heroP:'Chiedi con parole tue o tocca un luogo sulla mappa.',ph:'Chiedi di luoghi, missioni, trucchi...',lang:'Lingua',follow:'La mappa segue il video',dFollow:'Si sposta sui luoghi di cui parla il video',dShield:'Sfoca le anteprime che possono svelare la trama',copy:'Copia il link a questo zip',copied:'Link copiato',shield:'Scudo anti-spoiler',tour:'Fammi fare il giro di Leonida',info:'Info e crediti',by:'Un prodotto AXIX\u00ae',aiT:'minuti trovati da AI',closeV:'Chiudi video',more:'Altre opzioni',send:'Invia',plus:' e sottotitoli',newc:'Nuova chat',live:'Live: La mappa è dinamica e segue i contenuti del video:',z1:' zip',zn:' zip',sorted:', in ordine di utilità',start:'Inizia da qui',startSub:'Giri completi di Leonida: la mappa viaggia con il video',none:'Nessuno zip risponde ancora a questo. Prova con una di queste:',spot:'{n}{s} \u00e8 qui sulla mappa.',spotZ:'Questi zip parlano di {r}.',spotD:'{c} zip parlano proprio di questo luogo.',spotD1:'Uno zip parla proprio di questo luogo.',zipsN:'{c} zip su questo luogo',zips1:'1 zip su questo luogo',unv:'Informazione non verificata',rw:'Nella realt\u00e0: {w}',cat:{landmark:'Punto di riferimento',hotel:'Hotel',restaurant:'Ristorante',leisure:'Svago',events:'Eventi',retail:'Negozio',transportation:'Trasporti',government:'Edificio governativo',public:'Edificio pubblico',natural:'Natura',industrial:'Zona industriale',utilities:'Servizi',office:'Uffici',residential:'Residenziale'},found:'Ho trovato {n}{p}. Parte il più utile.',on:' su ',tourT:'Giro di Leonida',places:' luoghi',from:'dal minuto ',lasts:'dura ',views:' visual.',hid:'Titolo nascosto dallo scudo',my1:'Ti ha aiutato',my0:'Non ti ha aiutato',fbq:'Ti ha aiutato?',yes:'Sì',no:'No',lo:'Audio originale in italiano',ld:'Sottotitoli in italiano attivi \u00b7 audio italiano in \u2699 \u203a Traccia audio',ls:'Sottotitoli in italiano, tradotti da YouTube',ln:'Per questo video le traduzioni in italiano non sono disponibili.',to:'IT',td:'Sottotitoli + audio IT',ts:'Sottotitoli IT',tn:'Solo lingua originale',foot:'ZipTube \u00e8 un prodotto AXIX\u00ae. Sito non ufficiale, non affiliato a Rockstar Games o Take-Two. I video restano su YouTube e sono dei rispettivi creatori. Ordine: quota di voti utili, poi visualizzazioni. I voti sono anonimi. Le domande vengono registrate senza dati personali, per decidere quali video aggiungere.',footMap:' La mappa \u00e8 una ricostruzione della comunit\u00e0 (YANIS v17, GTADB, CC BY 4.0), non una mappa ufficiale. Luoghi, categorie, servizi ed edifici in cui si pu\u00f2 entrare vengono da GTA VI Landmarks Data (GTADB e collaboratori, CC BY 4.0, map.gtadb.org), riassunti e tradotti da ZipTube.',cTitle:'Prima di iniziare',cText:'ZipTube ti fa vedere il pezzo giusto dei video di YouTube, dentro il sito. Per farlo carica anteprime e video da YouTube (Google), che pu\u00f2 usare cookie. Senza, trovi comunque gli zip e li apri su YouTube. Usando ZipTube accetti i Termini d\u2019uso e l\u2019Informativa privacy.',cYes:'Accetta i video di YouTube',cNo:'Solo il necessario',cMore:'Privacy, cookie e termini',legal:'Privacy e termini',prefsL:'Preferenze cookie',ytNeed:'Per vedere questo video qui, attiva i video di YouTube. YouTube (Google) pu\u00f2 usare cookie.',ytOn:'Attiva i video di YouTube',ytOpen:'Oppure aprilo su YouTube al minuto ',pNec:'Memoria necessaria',pNecD:'Lingua, impostazioni, i tuoi voti. Sempre attiva',pYt:'Video e anteprime di YouTube',pYtD:'Caricati dai server di Google, che pu\u00f2 usare cookie',pCode:'Il tuo codice anonimo per i voti: ',pNoCode:'nessuno, si crea al tuo primo voto',pDel:'Cancella i miei dati',pDone:'Fatto: voti e codice cancellati da questo dispositivo e dalla nostra banca dati.',closeL:'Chiudi',priv:'Privacy e cookie',privT:'ZipTube non usa cookie propri, pubblicit\u00e0 o strumenti di tracciamento. Sul tuo dispositivo restano solo la lingua, le impostazioni, i tuoi voti e un codice casuale anonimo che serve a contare ogni voto una volta sola. I voti e il testo delle domande vengono registrati in forma anonima per migliorare le risposte: non scrivere dati personali nelle domande. Video e anteprime arrivano da YouTube (Google): quando avvii un video, YouTube riceve il tuo indirizzo IP e pu\u00f2 usare i propri cookie secondo le sue regole. Titolare del trattamento: AXIX.',ft:'Qui il video non può partire.',fbody:'YouTube blocca la riproduzione nelle pagine aperte con doppio clic. Chiudi questa pagina e apri ZipTube con il file "Apri ZipTube.command".',fl:'Intanto aprilo su YouTube dal minuto '}
 };
 
 // ---------- Zip: ogni capitolo utile di ogni video diventa uno zip ----------
@@ -492,6 +519,7 @@ function el(tag,c,x){var e=document.createElement(tag);if(c)e.className=c;if(x!=
 function mmss(s){var m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+(x<10?'0':'')+x}
 function wide(){return innerWidth>820}
 function cnt(n){return n+t(n===1?'z1':'zn')}
+function zc(c){return c===1?'1 zip':t('sgZ').replace('{c}',c)}
 function what(z){if(z.q!=null&&z.type!=='place')return QN[z.q].q[lang];if(z.type==='tour')return t('tourT')+' · '+z.pl.length+t('places');if(z.type==='place'){var n=RG[z.k].n;return z.title.length>n.length+14?z.title:n}return z.title}
 function views(n){return new Intl.NumberFormat(t('loc'),{notation:'compact',maximumFractionDigits:1}).format(n)+t('views')}
 
@@ -539,7 +567,7 @@ var tiles=L.tileLayer(TILES+'{z}/{y}/{x}.jpg',{minZoom:1,minNativeZoom:2,maxZoom
 // Una tessera che non arriva viene richiesta una seconda volta, invece di lasciare un riquadro vuoto.
 tiles.on('tileerror',function(e){var im=e.tile;if(im&&!im._again){im._again=1;setTimeout(function(){im.src=e.tile.src.split('?')[0]+'?r=1'},700)}});
 trail=L.layerGroup().addTo(map);
-function pad(){if(wide()&&document.body.classList.contains('playing'))return {paddingTopLeft:[40,90],paddingBottomRight:[innerWidth/2+40,40]};return wide()?{paddingTopLeft:[40,100],paddingBottomRight:[470,40]}:{paddingTopLeft:[10,64],paddingBottomRight:[10,Math.min($('side').offsetHeight,innerHeight*.66)+18]}}
+function pad(){if(wide()&&document.body.classList.contains('playing'))return {paddingTopLeft:[40,90],paddingBottomRight:[innerWidth/2+40,40]};return wide()?{paddingTopLeft:[$('ly').hidden?40:410,100],paddingBottomRight:[470,40]}:{paddingTopLeft:[10,64],paddingBottomRight:[10,Math.min($('side').offsetHeight,innerHeight*.66)+18]}}
 function fitAll(a){var o=pad();o.animate=!!a;o.duration=1.2;map[a?'flyToBounds':'fitBounds'](L.latLngBounds(ll(-10200,-7600),ll(2400,8200)),o)}
 function flyTo(k){var r=RG[k],o=pad();o.duration=1.3;map.flyToBounds(L.latLngBounds(ll(r.x-r.r,r.y-r.r),ll(r.x+r.r,r.y+r.r)),o)}
 var pins={};
@@ -577,22 +605,28 @@ function travel(a,b){
 // ---------- Luoghi con nome (dati GTADB, senza materiale da fughe di notizie) ----------
 // Zone dei dati collegate ai nostri segnaposti: solo quelle confermate dai nomi nei dati stessi.
 var A2R={'vice-city':'vc','port-vice-city':'vc','vice-city-international-airport':'vc','vice-beach':'vbeach','port-gellhorn':'pg','gellhorn-international-raceway':'pg','ambrosia':'amb','lummox-county':'kal','key-lento':'keys','mariana-county':'grass','watson-bay':'watson','capri':'capri'};
-var LY={},LYF={only:false,cat:''};
+// Filtri dei luoghi, sul modello della mappa originale (cerca, filtra, ordina), pensati per chi gioca.
+var LY={},LYF={q:'',cat:'',sv:'',z:false,e:false,v:'',rw:false,so:'name'};
+function lyActive(){return !!(LYF.q.trim()||LYF.cat||LYF.sv||LYF.z||LYF.e||LYF.v||LYF.rw)}
+// Nome mostrato: i luoghi senza nome prendono quello del servizio o della categoria.
+function plabel(p){return p.name||(p.sv&&p.sv[0]&&t('svc')[p.sv[0]])||(p.cat&&t('cat')[p.cat])||t('bld')}
+function pkind(p){return (p.sv||[]).map(function(s){return t('svc')[s]||s}).concat(p.cat&&p.name?[t('cat')[p.cat]]:p.cat&&p.sv&&p.sv.length?[t('cat')[p.cat]]:[]).filter(function(x,i,a){return x&&a.indexOf(x)===i}).join(' \u00b7 ')}
 var PLD=window.ZT_PLACES||{places:[],areas:[]},AREA={},SPOTS=[],placeMk=null;
 PLD.areas.forEach(function(a){AREA[a.id]=a;if(a.count>0&&a.id!=='leonida')SPOTS.push({name:a.name,isArea:true,x:a.x,y:a.y,u:a.u,r:Math.max(a.r,500),area:a.kind==='district'?a.parent:a.id,sub:a.kind==='district'&&AREA[a.parent]?AREA[a.parent].name:''})});
 function nkey(x){return norm(x).replace(/[^a-z0-9]+/g,' ').trim()}
 (function(){
+ PLD.places.forEach(function(p){p.name=p.name||''});
  var seen={};PLD.places.forEach(function(p){var n=norm(p.name);(seen[n]=seen[n]||[]).n=(seen[n].n||0)+1});
  var canvas=L.canvas({padding:.3}),layer=L.layerGroup(),rows=[],mk=[];
  PLD.places.forEach(function(p){
   var sub=[p.district&&AREA[p.district]?AREA[p.district].name:'',p.area&&AREA[p.area]?AREA[p.area].name:''].filter(Boolean).join(', ');
   var g=seen[norm(p.name)],sp=null;g.push(p);
-  if(g.n===1&&norm(p.name).length>=5){sp={name:p.name,x:p.x,y:p.y,r:260,area:p.area,sub:sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street};p._sp=sp}
+  if(g.n===1&&norm(p.name).length>=5){sp={name:p.name,x:p.x,y:p.y,r:260,area:p.area,sub:sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street,id:p.id,sv:p.sv,e:p.e};p._sp=sp}
   // Stesso nome su piu' punti vicini (un complesso, una statua e il suo negozio): un solo luogo cercabile, al centro.
   else if(g.n>1&&g.length===g.n&&norm(p.name).length>=5){var xs=g.map(function(q){return q.x}),ys=g.map(function(q){return q.y}),w=Math.max(Math.max.apply(0,xs)-Math.min.apply(0,xs),Math.max.apply(0,ys)-Math.min.apply(0,ys));
    if(w<=700){sp={name:p.name,x:(Math.max.apply(0,xs)+Math.min.apply(0,xs))/2,y:(Math.max.apply(0,ys)+Math.min.apply(0,ys))/2,r:260+w/2,area:p.area,sub:AREA[p.area]?AREA[p.area].name:'',u:g.every(function(q){return q.u})?1:0};g.forEach(function(q){q._sp=sp})}}
   if(sp)SPOTS.push(sp);
-  rows.push([p,sub]);
+  rows.push([p,sub]);p._sub=sub;
  });
  SPOTS.sort(function(a,b){return b.name.length-a.name.length});
  // Zip e luoghi: se il titolo di un capitolo nomina un luogo preciso della mappa, quello zip appartiene a quel luogo.
@@ -603,15 +637,24 @@ function nkey(x){return norm(x).replace(/[^a-z0-9]+/g,' ').trim()}
  rows.forEach(function(r){var p=r[0],sub=r[1],sp=p._sp,has=sp&&sp.zips;
   // Con video: punto grande rosa. Verificato: punto chiaro pieno. Non verificato: punto scuro con anello chiaro, e la finestrella lo dice.
   var mkr=L.circleMarker(ll(p.x,p.y),has?{renderer:canvas,radius:6.5,color:'#fff',weight:2,fillColor:'#d77b89',fillOpacity:1}:p.u?{renderer:canvas,radius:4.5,color:'#f5c59d',weight:2,fillColor:'#101818',fillOpacity:.95}:{renderer:canvas,radius:4,color:'#101818',weight:1.5,fillColor:'#f5c59d',fillOpacity:.95})
-   .bindTooltip(function(){var d=el('div',null,p.name+(sub?' \u00b7 '+sub:''));if(has)d.appendChild(el('small',null,t(sp.zips===1?'zips1':'zipsN').replace('{c}',sp.zips)));if(p.u){var m=el('small');m.appendChild(ni());m.appendChild(document.createTextNode(t('unv')));d.appendChild(m)}return d},{direction:'top',className:'ptip',offset:[0,-4]})
-   .on('click',function(){ask(p.name,sp||{name:p.name,x:p.x,y:p.y,r:260,area:p.area,sub:sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street})});
-  mk.push({m:mkr,p:p,has:!!has});
+   .bindTooltip(function(){var d=el('div',null,plabel(p)+(sub?' \u00b7 '+sub:''));var kd=pkind(p);if(kd&&kd!==plabel(p))d.appendChild(el('small',null,kd));if(has)d.appendChild(el('small',null,t(sp.zips===1?'zips1':'zipsN').replace('{c}',sp.zips)));if(p.u){var m=el('small');m.appendChild(ni());m.appendChild(document.createTextNode(t('unv')));d.appendChild(m)}return d},{direction:'top',className:'ptip',offset:[0,-4]})
+   .on('click',function(){ask(plabel(p),sp||{name:plabel(p),x:p.x,y:p.y,r:260,area:p.area,sub:sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street,id:p.id,sv:p.sv,e:p.e})});
+  mk.push({m:mkr,p:p,has:!!has,zips:has?sp.zips:0,sp:sp,sub:sub});
  });
  // Filtro dei luoghi (pannello "Livelli"): solo con zip e, volendo, una sola categoria.
- function refill(){layer.clearLayers();mk.forEach(function(r){if((!LYF.only||r.has)&&(!LYF.cat||(r.p.cat||'other')===LYF.cat))layer.addLayer(r.m)})}
- LY.refill=refill;LY.mk=mk;refill();
- function sync(){var on=map.getZoom()>=4.75;if(on&&!map.hasLayer(layer))layer.addTo(map);if(!on&&map.hasLayer(layer))map.removeLayer(layer)}
- map.on('zoomend',sync);sync();
+ function fs(r){if(r._l!==lang){r._l=lang;var p=r.p;r._f=' '+nkey([plabel(p),r.sub,p.street||'',p.rw||'',pkind(p),(p.sv||[]).join(' '),p.cat||'',(p.who||[]).join(' '),p.e?t('ent'):''].join(' '))+' '}return r._f}
+ function match(r){var p=r.p,raw=LYF.q.trim(),q=nkey(raw);
+  if(q&&(fs(r).indexOf(q)>=0)===(raw[0]==='!'))return false;   // il punto esclamativo davanti esclude, come nella mappa originale
+  return (!LYF.cat||(p.cat||'other')===LYF.cat)&&(!LYF.sv||(p.sv||[]).indexOf(LYF.sv)>=0)&&(!LYF.z||r.has)&&(!LYF.e||p.e)&&(LYF.v!=='v'||!p.u)&&(LYF.v!=='u'||p.u)&&(!LYF.rw||p.rw)}
+ LY.list=function(){var c=map.getCenter(),cx=c.lng*128-16384,cy=16384+c.lat*128,so=LYF.so;
+  var key={name:function(r){return (r.p.name?'0':'1')+nkey(plabel(r.p))},area:function(r){return nkey(r.sub||'~')+' '+nkey(plabel(r.p))},rw:function(r){return (r.p.rw?'0':'1')+nkey(r.p.rw||plabel(r.p))}}[so];
+  var num={zips:function(r){return -r.zips},near:function(r){return Math.hypot(r.p.x-cx,r.p.y-cy)},ns:function(r){return -r.p.y},we:function(r){return r.p.x}}[so];
+  return mk.filter(match).sort(function(a,b){if(num)return num(a)-num(b)||(nkey(plabel(a.p))<nkey(plabel(b.p))?-1:1);var x=key(a),y=key(b);return x<y?-1:x>y?1:0})};
+ function refill(){layer.clearLayers();var n=0;mk.forEach(function(r){if(match(r)){layer.addLayer(r.m);n++}});LY.shown=n;sync()}
+ LY.refill=refill;LY.mk=mk;
+ // Con un filtro attivo e pochi risultati i punti si vedono a qualsiasi distanza: si capisce subito dove sono.
+ function sync(){var on=map.getZoom()>=4.75||(lyActive()&&LY.shown<=400);if(on&&!map.hasLayer(layer))layer.addTo(map);if(!on&&map.hasLayer(layer))map.removeLayer(layer)}
+ map.on('zoomend',sync);refill();
 })();
 // Il luogo con nome citato nella domanda (il nome piu' lungo vince), se non e' gia' uno dei nostri segnaposti.
 function findSpot(text){var n=' '+norm(text).replace(/[^a-z0-9]+/g,' ')+' ';
@@ -719,6 +762,7 @@ function fillWelcome(){
  var c=$('cd'),L0=new Date((CFG.launch||'2026-11-19')+'T00:00:00'),n=new Date(),d=Math.round((L0-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5);
  c.hidden=!(d>=0);if(d>=0)c.textContent=d===0?t('cd0'):d===1?t('cd1'):t('cd').replace('{d}',d);
 }
+function setP(id){try{var u=new URL(location.href);if(id)u.searchParams.set('p',id);else u.searchParams.delete('p');history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}}
 function scrollToEl(e){var f=$('feed');f.scrollTop+=e.getBoundingClientRect().top-f.getBoundingClientRect().top-8}
 function ask(text,place){
  text=text.trim();if(!text)return;
@@ -731,10 +775,12 @@ function ask(text,place){
   r=ded.concat(k?ZIPS.filter(function(z){return z.k===k&&z.type==='place'&&okLang(z)&&ded.indexOf(z)<0}).sort(rank):[]).slice(0,6)}else if(spot&&r.length)spot=null;
  rpc('zt_asked',{p_game:GAME,p_lang:lang,p_q:text.slice(0,200),p_found:r.length});
  if(placeMk){placeMk.remove();placeMk=null}
+ setP(spot&&spot.id);
  if(spot){
   var sp=t('spot').split('{n}'),mb=say('ma',sp[0]+spot.name);if(spot.u)mb.appendChild(ni());
   mb.appendChild(document.createTextNode(sp[1].replace('{s}',spot.sub?' ('+spot.sub+')':'')+(ded.length?' '+t(ded.length===1?'spotD1':'spotD').replace('{c}',ded.length):r.length?' '+t('spotZ').replace('{r}',RG[A2R[spot.area]].n):'')));
-  var det=[spot.cat&&t('cat')[spot.cat],spot.street].filter(Boolean).join(' \u00b7 ');if(det)mb.appendChild(el('div','md',det));
+  var det=(spot.sv||[]).map(function(s){return t('svc')[s]||s}).concat([spot.cat&&t('cat')[spot.cat],spot.street]).filter(function(x,i,a){return x&&x!==spot.name&&a.indexOf(x)===i}).join(' \u00b7 ');if(det)mb.appendChild(el('div','md',det));
+  if(spot.e){var en=el('div','md',t('ent'));en.appendChild(ni());mb.appendChild(en)}
   if(spot.rw){var rw=el('div','md',t('rw').replace('{w}',spot.rw));rw.appendChild(ni());mb.appendChild(rw)}
   if(now)closeVideo();showSpot(spot);
   if(r.length){var bs={el:el('div','res'),list:r,keep:ded.length>0};blocks.push(bs);$('feed').appendChild(bs.el);drawBlock(bs)}
@@ -754,18 +800,20 @@ function sgBuild(){sgLang=lang;sgPool=[];
  QN.forEach(function(q){sgPool.push({k:'Q',text:q.q[lang],n:nkey(q.q[lang])})});
  TOPICS.forEach(function(x){var s=x[lang]||x.en;sgPool.push({k:'T',text:s,n:nkey(s)})});
  Object.keys(RG).forEach(function(k){if(pins[k])sgPool.push({k:'P',text:RG[k].n,n:nkey(RG[k].n),z:pins[k]._n})});
+ var sc={};(LY.mk||[]).forEach(function(r){(r.p.sv||[]).forEach(function(s){sc[s]=(sc[s]||0)+1})});
+ Object.keys(sc).forEach(function(s){var lb=t('svc')[s]||s;sgPool.push({k:'F',text:lb,n:nkey(lb+' '+s),f:s,z:sc[s]})});
  SPOTS.forEach(function(s){var n=nkey(s.name);if(!sgPool.some(function(o){return o.k==='P'&&o.n===n}))sgPool.push({k:'P',text:s.name,n:n,spot:s,z:s.zips||0,sub:s.sub})})}
 function sgHide(){$('sg').hidden=true;$('q').setAttribute('aria-expanded','false');sgList=[];sgAct=-1}
-function sgPick(o){sgHide();if(o.spot)ask(o.text,o.spot);else ask(o.text)}
+function sgPick(o){sgHide();if(o.f){$('q').value='';$('send').disabled=true;LYF.q='';LYF.cat='';LYF.sv=o.f;LYF.z=LYF.e=LYF.rw=false;LYF.v='';LY.refill();lyURL();openLayers();return}if(o.spot)ask(o.text,o.spot);else ask(o.text)}
 function sgPaint(){
  var v=nkey($('q').value),box=$('sg');if(v.length<2){sgHide();return}
  if(!sgPool||sgLang!==lang)sgBuild();
- var sc=function(o){var i=o.n.indexOf(v);if(i<0)return 0;return (i===0?3:o.n[i-1]===' '?2:1)+(o.z?.5:0)+(o.k==='P'?0:.2)};
+ var sc=function(o){var i=o.n.indexOf(v);if(i<0)return 0;return (i===0?3:o.n[i-1]===' '?2:1)+(o.z?.5:0)+(o.k==='P'?0:.2)+(o.k==='F'?.4:0)};
  var hit=sgPool.map(function(o){return [sc(o),o]}).filter(function(x){return x[0]>0}).sort(function(a,b){return b[0]-a[0]||(b[1].z||0)-(a[1].z||0)||a[1].text.length-b[1].text.length});
  var nq=0;sgList=hit.filter(function(x){if(x[1].k==='Q')return ++nq<=2;return true}).slice(0,6).map(function(x){return x[1]});
  if(!sgList.length){sgHide();return}
  box.innerHTML='';sgAct=-1;
- sgList.forEach(function(o,i){var b=el('button','sgo');b.type='button';b.setAttribute('role','option');b.id='sgo'+i;b.appendChild(el('small',null,t('sg'+o.k)));b.appendChild(el('span',null,o.text+(o.sub?' \u00b7 '+o.sub:'')));if(o.z)b.appendChild(el('em',null,t('sgZ').replace('{c}',o.z)));
+ sgList.forEach(function(o,i){var b=el('button','sgo');b.type='button';b.setAttribute('role','option');b.id='sgo'+i;b.appendChild(el('small',null,t('sg'+o.k)));b.appendChild(el('span',null,o.text+(o.sub?' \u00b7 '+o.sub:'')));if(o.z)b.appendChild(el('em',null,o.k==='F'?o.z:zc(o.z)));
   b.onmousedown=function(e){e.preventDefault();sgPick(o)};box.appendChild(b)});
  box.hidden=false;$('q').setAttribute('aria-expanded','true');box.classList.remove('down');
  if($('form').getBoundingClientRect().top<box.offsetHeight+20)box.classList.add('down');
@@ -873,29 +921,55 @@ setInterval(function(){
  else if(follow){if(k)flyTo(k);else if(prev!==undefined)fitAll(true)}
 },500);
 
-// ---------- Livelli della mappa: legenda dei punti e filtro dei luoghi ----------
+// ---------- Luoghi sulla mappa: cerca, filtra e ordina (sul modello della mappa originale) ----------
+var lyMax=60;
+function lyURL(){try{var u=new URL(location.href),m={pf:LYF.q.trim(),pc:LYF.cat,ps:LYF.sv,pz:LYF.z?1:'',pe:LYF.e?1:'',pv:LYF.v,pr:LYF.rw?1:'',po:LYF.so==='name'?'':LYF.so};
+ Object.keys(m).forEach(function(k){if(m[k])u.searchParams.set(k,m[k]);else u.searchParams.delete(k)});history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}}
+function lyChange(){lyMax=60;LY.refill();lyURL();lyPaintState();lyList()}
+function lyPaintState(){
+ [].forEach.call(document.querySelectorAll('#ly [data-f]'),function(b){var f=b.getAttribute('data-f');b.setAttribute('aria-pressed',f==='v'||f==='u'?LYF.v===f:!!LYF[f])});
+ if($('lyCat')){$('lyCat').value=LYF.cat;$('lySv').value=LYF.sv;$('lySo').value=LYF.so;if($('lyQ').value!==LYF.q)$('lyQ').value=LYF.q}
+ $('lyBtn').classList.toggle('act',lyActive());
+}
+function lyPick(r){if(!wide())closeLayers();var p=r.p,nm=plabel(p);ask(nm,r.sp||{name:nm,x:p.x,y:p.y,r:260,area:p.area,sub:r.sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street,id:p.id,sv:p.sv,e:p.e})}
+function lyList(){
+ var box=$('lyL');if(!box)return;var rs=LY.list(),hd=$('lyH');box.innerHTML='';hd.innerHTML='';
+ hd.appendChild(el('span',null,rs.length===1?t('lyN1'):t('lyN').replace('{n}',new Intl.NumberFormat(t('loc')).format(rs.length))));
+ if(lyActive()){var rz=el('button','lnk',t('lyReset'));rz.type='button';rz.onclick=function(){LYF.q='';LYF.cat='';LYF.sv='';LYF.z=LYF.e=LYF.rw=false;LYF.v='';lyChange()};hd.appendChild(rz)}
+ if(!rs.length){box.appendChild(el('div','lyno',t('lyNone')));return}
+ rs.slice(0,lyMax).forEach(function(r){var p=r.p,b=el('button','lyr');b.type='button';
+  b.appendChild(el('i','dot '+(r.has?'z':p.u?'u':'v')));var tx=el('span'),l1=el('b',null,plabel(p));if(p.u)l1.appendChild(ni());tx.appendChild(l1);
+  var kd=pkind(p),l2=[kd!==plabel(p)?kd:'',LYF.so==='rw'&&p.rw?p.rw:r.sub].filter(Boolean).join(' · ');if(l2)tx.appendChild(el('small',null,l2));b.appendChild(tx);
+  if(p.e)b.appendChild(el('em','en',t('fE')));if(r.zips)b.appendChild(el('em',null,zc(r.zips)));
+  b.onclick=function(e){if(e.target.closest&&e.target.closest('.ni'))return;lyPick(r)};box.appendChild(b)});
+ if(rs.length>lyMax){var mo=el('button','btn',t('lyMore'));mo.type='button';mo.style.cssText='display:block;margin:8px auto 2px;padding:5px 12px;font-size:12px';mo.onclick=function(){lyMax+=120;lyList()};box.appendChild(mo)}
+}
 function paintLayers(){
  var box=$('ly');box.innerHTML='';$('lyBtn').title=t('layers');$('lyBtn').setAttribute('aria-label',t('layers'));
- var mk=LY.mk||[],nz=mk.filter(function(r){return r.has}).length,nu=mk.filter(function(r){return r.p.u}).length;
- box.appendChild(el('h3',null,t('layers')));
- [['z',t('lgZ'),nz],['v',t('lgV'),mk.length-nu],['u',t('lgU'),nu]].forEach(function(r){var d=el('div','lgr');d.appendChild(el('i','dot '+r[0]));var s=el('span',null,r[1]);if(r[0]==='u')s.appendChild(ni());d.appendChild(s);d.appendChild(el('em',null,r[2]));box.appendChild(d)});
- box.appendChild(el('div','sep'));
- var sw=el('button','mi');sw.type='button';sw.setAttribute('role','switch');sw.setAttribute('aria-checked',LYF.only);sw.style.cssText='padding:4px 0;width:100%';sw.appendChild(el('span',null,t('onlyZ')));sw.appendChild(el('i','sw'));
- sw.onclick=function(){LYF.only=!LYF.only;LY.refill();paintLayers()};box.appendChild(sw);
- var cnt={};mk.forEach(function(r){var c=r.p.cat||'other';cnt[c]=(cnt[c]||0)+1});
- var ch=el('div','chips');ch.style.marginTop='9px';
- [''].concat(Object.keys(cnt).sort(function(a,b){return (a==='other')-(b==='other')||cnt[b]-cnt[a]})).forEach(function(c){
-  var b=el('button','chip',c===''?t('allCats'):c==='other'?t('other'):(t('cat')[c]||c));b.type='button';b.setAttribute('aria-pressed',LYF.cat===c);
-  b.onclick=function(){LYF.cat=c;LY.refill();paintLayers()};ch.appendChild(b)});
+ var mk=LY.mk||[],hd=el('div','lyhd');hd.appendChild(el('h3',null,t('layers')));
+ var x=el('button','xb');x.type='button';x.setAttribute('aria-label',t('closeL'));x.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';x.onclick=closeLayers;hd.appendChild(x);box.appendChild(hd);
+ var q=el('input');q.id='lyQ';q.type='search';q.placeholder=t('lyPh');q.setAttribute('aria-label',t('lyPh'));q.autocomplete='off';q.value=LYF.q;q.oninput=function(){LYF.q=q.value;lyChange()};box.appendChild(q);
+ function sel(id,first,opts,val,on){var s=el('select');s.id=id;s.setAttribute('aria-label',first||t('lySo'));if(first!=null){var o0=el('option',null,first);o0.value='';s.appendChild(o0)}
+  opts.forEach(function(o){var e=el('option',null,o[1]);e.value=o[0];s.appendChild(e)});s.value=val;s.onchange=function(){on(s.value)};return s}
+ var cc={},sc={};mk.forEach(function(r){var c=r.p.cat||'other';cc[c]=(cc[c]||0)+1;(r.p.sv||[]).forEach(function(s){sc[s]=(sc[s]||0)+1})});
+ var row=el('div','lysel');
+ row.appendChild(sel('lyCat',t('lyCat'),Object.keys(cc).sort(function(a,b){return (a==='other')-(b==='other')||cc[b]-cc[a]}).map(function(c){return [c,(c==='other'?t('other'):t('cat')[c]||c)+' ('+cc[c]+')']}),LYF.cat,function(v){LYF.cat=v;lyChange()}));
+ row.appendChild(sel('lySv',t('lySv'),Object.keys(sc).sort(function(a,b){return sc[b]-sc[a]||(a<b?-1:1)}).map(function(s){return [s,(t('svc')[s]||s)+' ('+sc[s]+')']}),LYF.sv,function(v){LYF.sv=v;lyChange()}));
+ box.appendChild(row);
+ var ch=el('div','chips');
+ [['z','fZ'],['e','fE',1],['v','fV'],['u','fU',1],['rw','fR',1]].forEach(function(f){var b=el('button','chip',t(f[1]));b.type='button';b.setAttribute('data-f',f[0]);if(f[2])b.appendChild(ni());
+  b.onclick=function(e){if(e.target.closest&&e.target.closest('.ni'))return;if(f[0]==='v'||f[0]==='u')LYF.v=LYF.v===f[0]?'':f[0];else LYF[f[0]]=!LYF[f[0]];lyChange()};ch.appendChild(b)});
  box.appendChild(ch);
- if(map.getZoom()<4.75){var hn=el('div','hint',t('zoomIn'));var go=el('button','btn',t('showPl'));go.type='button';go.style.display='block';
-  go.onclick=function(){map.flyTo(map.getZoom()<3?cen('vc'):map.getCenter(),5,{duration:1.1})};hn.appendChild(go);box.appendChild(hn)}
+ var so=el('div','lyso');so.appendChild(el('span',null,t('lySo')));so.appendChild(sel('lySo',null,Object.keys(t('so')).map(function(k){return [k,t('so')[k]]}),LYF.so,function(v){LYF.so=v;lyChange()}));box.appendChild(so);
+ var st=el('div','lyst');st.id='lyH';box.appendChild(st);var ls=el('div');ls.id='lyL';box.appendChild(ls);
+ var lg=el('div','lylg');[['z',t('lgZ')],['v',t('lgV')],['u',t('lgU')]].forEach(function(r){var s=el('span');s.appendChild(el('i','dot '+r[0]));s.appendChild(document.createTextNode(r[1]));if(r[0]==='u')s.appendChild(ni());lg.appendChild(s)});box.appendChild(lg);
+ lyPaintState();lyList();
 }
 function closeLayers(){$('ly').hidden=true;$('lyBtn').setAttribute('aria-expanded','false')}
-$('lyBtn').onclick=function(e){e.stopPropagation();var o=$('ly').hidden;if(o){paintLayers();$('ly').hidden=false;$('lyBtn').setAttribute('aria-expanded','true')}else closeLayers()};
-document.addEventListener('click',function(e){var pth=e.composedPath?e.composedPath():[];if(!$('ly').hidden&&pth.indexOf($('ly'))<0&&!$('ly').contains(e.target)&&!(e.target.closest&&e.target.closest('.ni')))closeLayers()});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLayers()});
-map.on('zoomend',function(){if(!$('ly').hidden)paintLayers()});
+function openLayers(){paintLayers();$('ly').hidden=false;$('lyBtn').setAttribute('aria-expanded','true');if(wide()&&!now&&map.getZoom()<3.2)fitAll(true)}
+$('lyBtn').onclick=function(e){e.stopPropagation();if($('ly').hidden)openLayers();else closeLayers()};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('ly').hidden&&document.activeElement!==$('lyQ'))closeLayers()});
+map.on('moveend',function(){if(!$('ly').hidden&&LYF.so==='near')lyList()});
 // ---------- Menu "+" ----------
 function closeMenu(){$('menu').classList.remove('open');$('plus').setAttribute('aria-expanded','false')}
 $('plus').onclick=function(e){e.stopPropagation();var mn=$('menu');paintMenu();mn.classList.remove('down');var o=mn.classList.toggle('open');$('plus').setAttribute('aria-expanded',o);
@@ -919,7 +993,7 @@ function paintMenu(){
   b.onclick=function(e){e.stopPropagation();lang=k;store.set('zt_lang',k);applyLang();if(now)play(now)};box.appendChild(b)});
 }
 function applyLang(){
- document.documentElement.lang=lang;document.title=t('ttl');if(!$('ly').hidden)paintLayers();$('lyBtn').title=t('layers');$('lyBtn').setAttribute('aria-label',t('layers'));
+ document.documentElement.lang=lang;document.title=t('ttl');if(!$('ly').hidden)paintLayers();if(LY.refill)LY.refill();$('lyBtn').title=t('layers');$('lyBtn').setAttribute('aria-label',t('layers'));
  [['mlLang','lang'],['mlFollow','follow'],['mdFollow','dFollow'],['mlShield','shield'],['mdShield','dShield'],['mlCopy','copy'],['mlNew','newc'],['livelbl','live'],['fbq','fbq'],['fbY','yes'],['fbN','no']].forEach(function(p){$(p[0]).textContent=t(p[1])});
  if($('welcome')){$('claim').textContent=t('claim');$('heroT').textContent=t('heroT');$('heroP').textContent=t('heroP');$('sugg').innerHTML='';chips($('sugg'),ask);fillWelcome()}
  $('foot').innerHTML='';$('foot').appendChild(el('div','by',t('by')));var dt=el('details'),sm=el('summary',null,t('info'));dt.appendChild(sm);var fp=el('p',null,t('foot')+t('footMap'));fp.appendChild(ni());dt.appendChild(fp);var fl=el('div','links');fl.appendChild(dt);$('foot').appendChild(fl);[['legal','privacy'],['prefsL','cookie']].forEach(function(p){var b=el('button','lnk',t(p[0]));b.type='button';b.onclick=function(){openLegal(p[1])};fl.appendChild(b)});$('mlLegal').textContent=t('legal');
@@ -997,7 +1071,10 @@ function hashLegal(){var h=location.hash.slice(1);if(LGTABS.indexOf(h)>=0&&($('l
 hashLegal();window.addEventListener('hashchange',hashLegal);
 // Arrivo da un link condiviso: ?z=idVideo.secondo apre quello zip, ?q=domanda fa la domanda.
 (function(){var sp;try{sp=new URLSearchParams(location.search)}catch(e){return}
- var zp=sp.get('z'),qp=sp.get('q');
+ var zp=sp.get('z'),qp=sp.get('q'),pp=sp.get('p');
+ LYF.q=(sp.get('pf')||'').slice(0,60);LYF.cat=sp.get('pc')||'';LYF.sv=sp.get('ps')||'';LYF.z=!!sp.get('pz');LYF.e=!!sp.get('pe');LYF.v=/^[vu]$/.test(sp.get('pv')||'')?sp.get('pv'):'';LYF.rw=!!sp.get('pr');if(t('so')[sp.get('po')])LYF.so=sp.get('po');
+ if(lyActive()||LYF.so!=='name'){LY.refill();if(wide()||!(zp||qp||pp))openLayers();else lyPaintState()}
+ if(pp&&!zp){var pr=(LY.mk||[]).filter(function(r){return r.p.id===pp})[0];if(pr){lyPick(pr);return}}
  if(zp){var i=zp.lastIndexOf('.'),z=BY[zp.slice(0,i)+'|'+zp.slice(i+1)];
   if(z){var w=$('welcome');if(w)w.remove();var m=say('ma',t('shared'));
    var more=(z.spot?ZIPS.filter(function(x){return x.spot===z.spot}):engine(z.title||z.v.t)).filter(function(x){return x!==z}).slice(0,5);
