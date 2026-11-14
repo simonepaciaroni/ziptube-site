@@ -1,0 +1,39 @@
+# Scompatta i pacchetti caricati nella cartella "bootstrap" e pubblica il sito di prova con GitHub Pages.
+name: Pubblica sito di prova
+on:
+  push:
+    paths: ["bootstrap/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scompatta e salva
+        run: |
+          if ls bootstrap/*.zip >/dev/null 2>&1; then
+            for z in bootstrap/*.zip; do unzip -o -q "$z" -d .; done
+            git rm -r -q --cached bootstrap
+            rm -rf bootstrap
+            git config user.name "ZipTube motore"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A
+            git commit -q -m "File del sito scompattati"
+            git push
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deploy
+        uses: actions/deploy-pages@v4
