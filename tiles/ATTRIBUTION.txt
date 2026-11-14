@@ -1,0 +1,2 @@
+Map tiles: YANIS v17 community map via GTADB (https://map.gtadb.org) and contributors, licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+Changes: legend panel removed, files re-arranged.

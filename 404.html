@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/ziptube-site/">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZipTube</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='zg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f5c59d'/%3E%3Cstop offset='.55' stop-color='%23d77b89'/%3E%3Cstop offset='1' stop-color='%239a6aa0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23zg)'/%3E%3Cpath d='M10.5 10.5h11L10.5 21.5h11' fill='none' stroke='%23141a1a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<style>
+/* Caratteri e mappa serviti dal nostro spazio: la pagina non contatta altri siti finche' non compaiono anteprime o video di YouTube. */
+@font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(vendor/fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;font-display:swap;src:url(vendor/fonts/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;font-display:swap;src:url(vendor/fonts/inter-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:500;font-display:swap;src:url(vendor/fonts/space-grotesk-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url(vendor/fonts/space-grotesk-latin-700-normal.woff2) format('woff2')}
+/* Mappa a tutto schermo. Marchio in alto a sinistra. A destra un solo pannello: video, conversazione con i risultati, campo di domanda. */
+:root{--bg:#0d1414;--glass:#1018185c;--solid:#161d1dc7;--line:#ffffff1c;--fg:#f3f1e8;--mute:#a3b3ae;--sun:#f5c59d;--rose:#d77b89;--plum:#76536d;--sea:#2c66a5;--grad:linear-gradient(100deg,#f5c59d,#d77b89 55%,#9a6aa0);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14.5px/1.5 Inter,system-ui,sans-serif;overflow:hidden}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,.zip:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+svg{flex:none}
+#map{position:absolute;inset:0;background:var(--sea)}
+.leaflet-container{font:inherit;background:var(--sea)}
+/* Ai livelli di zoom intermedi le tessere si toccano con un filo di sovrapposizione: niente righine tra una e l'altra. */
+.leaflet-tile-container img{width:256.6px!important;height:256.6px!important}
+.leaflet-control-attribution{background:#0d141480!important;color:var(--mute)!important;font-size:10.5px}
+.leaflet-control-attribution a{color:var(--mute)!important}
+.leaflet-bar a{background:#10181894!important;backdrop-filter:blur(10px);color:var(--fg)!important;border-color:var(--line)!important}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);box-shadow:0 16px 44px #0006;text-shadow:0 1px 2px #0008}
+
+/* Marchio: segno e nome in alto a sinistra, senza pannello. L'ombra lo tiene leggibile sopra ogni punto della mappa. */
+#brand{position:absolute;z-index:1000;left:18px;top:16px}
+.logo{font:700 23px/1 "Space Grotesk",sans-serif;letter-spacing:-.035em;display:flex;align-items:center;gap:9px;color:#fff;text-decoration:none;text-shadow:0 1px 3px #0009,0 0 14px #0006}
+.logo svg{flex:none;filter:drop-shadow(0 2px 6px #0007)}
+.logo:focus-visible{outline:2px solid var(--sun);outline-offset:4px;border-radius:8px}
+#live{position:absolute;z-index:1000;left:16px;top:60px;padding:7px 14px 7px 11px;border-radius:40px;display:none;align-items:center;gap:8px;font-size:12.5px}
+#live i{width:8px;height:8px;border-radius:50%;background:var(--rose);animation:beat 1.4s infinite}
+#live b{font-family:"Space Grotesk",sans-serif}
+
+#side{position:absolute;z-index:1000;right:16px;top:16px;max-height:calc(100% - 32px);width:420px;border-radius:22px;display:flex;flex-direction:column}
+#pwrap{display:none;padding:12px 12px 0;flex:none}
+#pbox{aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000}
+#pbox iframe,#yt{width:100%;height:100%;display:block;border:0}
+#zrow{display:flex;align-items:center;gap:10px;padding:10px 4px 0;font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+#zbar{position:relative;flex:1;height:8px;border-radius:2px;background:repeating-linear-gradient(90deg,#ffffff2e 0 3px,transparent 3px 6px)}
+#zseg{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(90deg,var(--sun) 0 3px,transparent 3px 6px)}
+#zpull{position:absolute;top:-5px;width:11px;height:18px;margin-left:-5.5px;border-radius:3px 3px 6px 6px;background:radial-gradient(circle at 50% 68%,#101818 0 1.8px,transparent 2.3px),var(--grad);box-shadow:0 2px 6px #0009;transition:left .5s linear}
+#zrow b{color:var(--sun);font-weight:600}
+#pmeta{display:flex;align-items:center;gap:8px;padding:8px 4px 2px;font-size:12px;color:var(--mute)}
+#lline{flex:1;min-width:0}
+#lline.warn{color:var(--rose)}
+#fbq{white-space:nowrap}
+.vote{border:1px solid var(--line);background:none;border-radius:40px;padding:2px 11px;font-size:12px;color:var(--mute)}
+.vote[aria-pressed=true]{border-color:var(--sun);color:var(--sun);font-weight:600}
+.vote.no[aria-pressed=true]{border-color:var(--rose);color:var(--rose)}
+
+#feed{flex:0 1 auto;min-height:0;overflow:auto;border-radius:22px 22px 0 0;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px}
+#welcome .eyebrow{font:600 10.5px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--sun);margin:2px 2px 0}
+#welcome h2{font:700 20px/1.2 "Space Grotesk",sans-serif;letter-spacing:-.02em;margin:4px 2px 4px;text-wrap:balance}
+#welcome p{margin:0 2px 12px;color:var(--mute);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line);background:#ffffff0d;border-radius:40px;padding:5px 12px;font-size:13px;text-align:left}
+.chip:hover{border-color:#ffffff59;background:#ffffff17}
+.mu{align-self:flex-end;background:#ffffff17;border-radius:15px 15px 4px 15px;padding:6px 12px;max-width:85%;font-size:14px}
+.ma{display:flex;gap:8px;font-size:13.5px;color:#d9ddd3}
+.ma i{width:12px;height:17px;border-radius:3px 3px 6px 6px;background:radial-gradient(circle at 50% 66%,#101818 0 1.6px,transparent 2.1px),var(--grad);flex:none;margin:2px 2px 0}
+.ma .chips{margin-top:8px}
+.res{display:flex;flex-direction:column;gap:6px}
+.zip{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:center;border:1px solid transparent;border-radius:12px;padding:5px;cursor:pointer;transition:background .15s,border-color .15s}
+.zip:hover{background:#ffffff0d}
+.zip.on{border-color:#f5c59d80;background:#f5c59d14}
+.th{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000}
+.th img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s}
+.th span{position:absolute;left:4px;bottom:4px;background:var(--grad);color:#1b1416;font:600 10.5px Inter;padding:0 6px 0 4px;border-radius:5px 5px 5px 9px;font-variant-numeric:tabular-nums}
+.th span::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:#1b1416;margin-right:4px;vertical-align:1px}
+.zip{position:relative}
+.zip.on::before{content:'';position:absolute;left:-1px;top:9px;bottom:9px;width:4px;border-radius:2px;background:repeating-linear-gradient(180deg,var(--sun) 0 3px,transparent 3px 6px)}
+.l1{display:flex;gap:6px;align-items:baseline;min-width:0}
+.who{font-weight:600;white-space:nowrap}
+.what{color:var(--sun);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{color:var(--mute);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{color:var(--sun)}
+.tag.n{color:var(--mute)}
+.tag.my{color:var(--sun)}
+.tag.my.no{color:var(--rose)}
+.shield .th img{filter:blur(12px) saturate(.5)}
+
+.composer{position:relative;flex:none;display:flex;align-items:center;gap:6px;margin:4px 12px 0;background:#00000059;border:1px solid var(--line);border-radius:16px;padding:5px}
+.composer:focus-within{border-color:#ffffff47}
+#q{flex:1;min-width:0;border:0;background:none;outline:0;padding:7px 4px;font-size:14.5px}
+#q::placeholder{color:#8b9a96}
+.ib{width:34px;height:34px;border-radius:50%;border:0;display:grid;place-items:center;background:#ffffff14;color:var(--fg)}
+.ib:hover{background:#ffffff26}
+#send{background:var(--grad);color:#1b1416}
+#send:disabled{opacity:.35;cursor:default}
+#menu{display:none;position:absolute;z-index:5;left:0;bottom:calc(100% + 8px);width:min(320px,100%);background:var(--solid);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:0 20px 50px #000b}
+#menu.down{bottom:auto;top:calc(100% + 8px)}
+.mrow{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 11px;font-size:14px}
+.mrow span{flex:1}
+.seg{display:flex;gap:2px;background:#ffffff12;border-radius:9px;padding:2px}
+.seg button{border:0;background:none;padding:3px 11px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--mute)}
+.seg button[aria-pressed=true]{background:#ffffff2e;color:var(--fg)}
+.mi b{display:block;font-weight:500}
+.mi small{display:block;color:var(--mute);font-size:12px;line-height:1.35}
+.sw{width:34px;height:20px;border-radius:20px;background:#ffffff26;position:relative;flex:none;transition:background .15s}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.mi[aria-checked=true] .sw{background:var(--grad)}
+.mi[aria-checked=true] .sw::after{left:16px}
+.mi[aria-disabled=true]{opacity:.4;cursor:default}
+#menu.open{display:block}
+.mi{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;border-radius:10px;padding:9px 11px;text-align:left;font-size:14px}
+.mi:hover,.mi:focus-visible{background:#ffffff12;outline:0}
+.mi span{flex:1}
+.mi em{font-style:normal;color:var(--mute);font-size:12.5px}
+.mi .ck{color:#7aa7ff;visibility:hidden}
+.mi[aria-checked=true] .ck{visibility:visible}
+.sep{height:1px;background:var(--line);margin:5px 8px}
+.ptip{background:#101818e6;color:#f3f1e8;border:1px solid #ffffff2e;border-radius:8px;font:500 12px Inter,sans-serif;box-shadow:0 4px 14px #0008}
+.ptip::before{display:none}
+.ptip small{display:block;color:var(--sun);font-size:11px;margin-top:2px}
+.ptip small .ni{pointer-events:none;margin:0 4px 0 0;width:13px;height:13px;font-size:9px}
+/* (i): informazione non verificata. Al passaggio del mouse, al tocco o da tastiera apre la piccola finestra #nitip. */
+.ni{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-left:5px;border-radius:50%;border:1px solid currentColor;font:italic 700 10px/1 Georgia,'Times New Roman',serif;opacity:.8;cursor:help;vertical-align:1px;pointer-events:auto;-webkit-user-select:none;user-select:none;flex:none;transition:background .15s,opacity .15s}
+.ni:hover,.ni:focus-visible,.ni.on{opacity:1;background:var(--sun);border-color:var(--sun);color:#12191a;outline:0}
+#nitip{position:fixed;z-index:4000;left:0;top:0;padding:5px 10px;border-radius:9px;background:#101818f2;border:1px solid #ffffff2e;color:var(--fg);font:500 12px Inter,sans-serif;white-space:nowrap;box-shadow:0 6px 18px #0009;pointer-events:none}
+#nitip[hidden]{display:none}
+.md{font-size:12.5px;color:var(--mute);margin-top:4px}
+.foot{flex:none;font-size:11px;color:#7f8e8a;padding:6px 18px 9px;text-align:center}
+.foot summary{cursor:pointer;list-style:none;display:inline-block;padding:2px 8px;border-radius:8px}
+.foot summary::-webkit-details-marker{display:none}
+.foot summary:hover{color:var(--fg)}
+.foot summary:focus{outline:0}
+.foot summary:focus-visible{outline:2px solid var(--sun)}
+.foot summary::after{content:" \25BE"}
+.foot details[open] summary::after{content:" \25B4"}
+/* Le due note espandibili stanno sulla stessa riga; quella aperta prende tutta la larghezza. */
+.foot .links{display:flex;flex-wrap:wrap;justify-content:center;gap:0 6px}
+.foot details[open]{flex-basis:100%}
+.foot .by{font-size:10.5px;letter-spacing:.04em;color:#9fb0aa;margin-bottom:2px}
+.foot p{margin:4px 0 2px;line-height:1.45;text-align:left}
+
+.pin{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;padding:5px 12px 5px 6px;border-radius:40px;background:#0d141966;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);font:600 13px Inter,sans-serif;white-space:nowrap;cursor:pointer;box-shadow:0 4px 14px #0008;transition:transform .2s,background .2s,opacity .25s}
+.pin i{width:21px;height:21px;border-radius:50%;background:var(--plum);font:600 11px/21px Inter;font-style:normal;text-align:center}
+.pin:hover{transform:translate(-50%,-50%) scale(1.08)}
+.pin.dim{opacity:.35}
+.pin.sel{background:var(--fg);color:#12191a}
+.pin.sel i{background:#12191a;color:var(--fg)}
+.pin.live{opacity:1;background:var(--grad);color:#1b1416;border-color:transparent;animation:glow 1.4s infinite}
+.pin.live i{background:#1b1416;color:var(--sun)}
+@keyframes beat{0%{box-shadow:0 0 0 0 #d77b89}70%{box-shadow:0 0 0 9px #d77b8900}100%{box-shadow:0 0 0 0 #d77b8900}}
+@keyframes glow{0%{box-shadow:0 0 0 0 #f5c59dcc}70%{box-shadow:0 0 0 16px #f5c59d00}100%{box-shadow:0 0 0 0 #f5c59d00}}
+
+/* Video aperto: lo schermo si divide a meta', mappa a sinistra e video a destra */
+body.playing #side{left:calc(50% + 8px);right:16px;width:auto;bottom:16px;max-height:none}
+body.playing #pwrap{padding:14px 14px 0}
+body.playing #feed{flex:1 1 auto}
+#pwrap{position:relative}
+#close{position:absolute;top:22px;right:22px;z-index:2;width:30px;height:30px;border-radius:50%;border:0;background:#000000a6;color:#fff;display:grid;place-items:center}
+#close:hover{background:#000000d9}
+@media (max-width:820px){
+ body.playing #map{right:0}
+ body.playing #side{left:8px;right:8px;top:auto;bottom:8px;max-height:62vh}
+ /* Finestre strette ma larghe piu' di un telefono: il video non deve mangiarsi l'elenco e la barra di ricerca. */
+ #pbox{max-width:calc(32vh * 16 / 9);margin:0 auto}
+ #close{top:18px;right:18px}
+}
+@media (max-width:820px){
+ #brand{left:12px;top:12px}.logo{font-size:20px}.logo svg{width:25px;height:25px}
+ #live{left:8px;top:50px}
+ #side{left:8px;right:8px;bottom:8px;top:auto;width:auto;max-height:58vh;border-radius:18px}
+ .leaflet-control-zoom,.leaflet-control-attribution{display:none}
+ /* Su telefono, mentre un video e' aperto, lo spazio va al video e agli zip: note e crediti tornano alla chiusura. */
+ body.playing .foot{display:none}
+ #pmeta{flex-wrap:wrap;gap:6px 8px}
+ #lline{flex:1 1 100%}
+}
+/* Pulsanti e finestre di consenso e testi legali */
+.btn{border:1px solid var(--line);background:#ffffff14;color:var(--fg);border-radius:40px;padding:8px 16px;font:600 13px Inter,sans-serif;text-shadow:none}
+.btn:hover{background:#ffffff26}
+.btn.pri{background:var(--grad);border-color:transparent;color:#1b1416}
+.btn.pri:hover{filter:brightness(1.07);background:var(--grad)}
+.lnk{background:none;border:0;padding:2px 8px;border-radius:8px;color:inherit;font:inherit;cursor:pointer}
+.lnk:hover{color:var(--fg)}
+.lnk:focus-visible,.btn:focus-visible,.xb:focus-visible,.swb:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+.xb{width:30px;height:30px;border-radius:50%;border:0;background:#ffffff14;color:var(--fg);display:grid;place-items:center;flex:none}
+.xb:hover{background:#ffffff2b}
+#consent{position:fixed;z-index:3000;left:16px;bottom:16px;width:min(410px,calc(100vw - 32px));border-radius:20px;padding:18px 18px 12px;background:#101818e6}
+#consent[hidden],#legal[hidden]{display:none}
+#consent h2{font:700 17px/1.2 "Space Grotesk",sans-serif;margin:0 36px 6px 0}
+#consent p{margin:0 0 13px;font-size:13px;line-height:1.5;color:#d9ddd3}
+#consent .xb{position:absolute;top:12px;right:12px}
+#consent .lnk{color:var(--mute);font-size:12px;text-decoration:underline;text-underline-offset:2px;padding:2px 0}
+.crow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:9px}
+#legal{position:fixed;inset:0;z-index:3500;background:#000000a6;display:grid;place-items:center;padding:16px}
+.lbox{width:min(760px,100%);max-height:min(88vh,920px);display:flex;flex-direction:column;border-radius:22px;background:#111919f7;border:1px solid var(--line);box-shadow:0 30px 80px #000a}
+.lhead{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.lhead .seg{flex-wrap:wrap}
+.lhead .xb{margin-left:auto}
+#lgBody{overflow:auto;padding:4px 26px 26px;font-size:14px;line-height:1.6;color:#dfe3da;outline:0}
+#lgBody h2{font:700 22px/1.2 "Space Grotesk",sans-serif;margin:20px 0 6px;color:var(--fg)}
+#lgBody h3{font:700 15px/1.3 "Space Grotesk",sans-serif;margin:20px 0 4px;color:var(--fg)}
+#lgBody p{margin:6px 0}
+#lgBody ul{margin:6px 0;padding-left:20px}
+#lgBody li{margin:3px 0}
+#lgBody a{color:var(--sun)}
+#lgBody table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+#lgBody th,#lgBody td{text-align:left;padding:6px 8px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+#lgBody th{color:var(--mute);font-weight:600}
+#lgBody .draft{border:1px solid var(--rose);color:#ffc9d1;border-radius:10px;padding:8px 12px;margin-top:16px;font-size:13px}
+#lgBody .upd{color:var(--mute);font-size:12.5px;margin-top:22px}
+.prefs{border:1px solid var(--line);border-radius:14px;padding:8px 14px 12px;margin:14px 0 4px;background:#ffffff0a}
+.prow{display:flex;align-items:center;gap:12px;padding:7px 0}
+.prow>span{flex:1;min-width:0}
+.prow b{display:block;color:var(--fg);font-weight:600}
+.prow small{display:block;color:var(--mute);font-size:12.5px;line-height:1.4}
+.swb{border:0;background:none;padding:2px;border-radius:20px}
+.swb .sw{display:block}
+.swb[disabled]{opacity:.55}
+.swb[aria-checked=true] .sw{background:var(--grad)}
+.swb[aria-checked=true] .sw::after{left:16px}
+.pcode{font:12px ui-monospace,Menlo,monospace;color:var(--mute);word-break:break-all}
+.pmsg{color:var(--sun);font-size:12.5px}
+/* Senza consenso a YouTube: niente anteprime, e al posto del video la richiesta con il link diretto. */
+.th.noimg{background:linear-gradient(135deg,#f5c59d3d,#9a6aa066),#141c1c}
+.ytask{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;height:100%;padding:18px;font-size:13px;color:#d9ddd3;background:linear-gradient(135deg,#f5c59d14,#9a6aa024),#0c1212}
+.ytask a{color:var(--sun);font-size:12.5px}
+@media (max-width:820px){
+ #consent{left:8px;right:8px;bottom:8px;width:auto}
+ #legal{padding:0}
+ .lbox{width:100%;height:100%;max-height:none;border-radius:0}
+ #lgBody{padding:4px 18px 26px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<header id="brand"><a class="logo" href="./" aria-label="ZipTube"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="zg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5c59d"/><stop offset=".55" stop-color="#d77b89"/><stop offset="1" stop-color="#9a6aa0"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#zg)"/><path d="M10.5 10.5h11L10.5 21.5h11" fill="none" stroke="#141a1a" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>ZipTube</span></a></header>
+<div id="live" class="glass"><i></i><span><span id="livelbl"></span> <b id="livename"></b></span></div>
+
+<aside id="side" class="glass">
+  <div id="pwrap">
+    <button id="close" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div id="pbox"><div id="yt"></div></div>
+    <div id="zrow"><div id="zbar"><div id="zseg"></div><div id="zpull"></div></div><span id="zlab"></span></div>
+    <div id="pmeta"><span id="lline"></span><span id="fbq"></span><button class="vote" id="fbY" type="button"></button><button class="vote no" id="fbN" type="button"></button></div>
+  </div>
+  <div id="feed" aria-live="polite">
+    <div id="welcome"><div class="eyebrow" id="claim"></div><h2 id="heroT"></h2><p id="heroP"></p><div class="chips" id="sugg"></div></div>
+  </div>
+  <form class="composer" id="form" autocomplete="off">
+    <button class="ib" id="plus" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+    <input id="q" type="text">
+    <button class="ib" id="send" type="submit" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+    <div id="menu" role="menu">
+      <div class="mrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg>
+        <span id="mlLang"></span><div class="seg" id="langs" role="group"></div>
+      </div>
+      <button class="mi" id="miFollow" type="button" role="menuitemcheckbox">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>
+        <span><b id="mlFollow"></b><small id="mdFollow"></small></span><i class="sw"></i>
+      </button>
+      <button class="mi" id="miShield" type="button" role="menuitemcheckbox">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6l8-3z"/></svg>
+        <span><b id="mlShield"></b><small id="mdShield"></small></span><i class="sw"></i>
+      </button>
+      <div class="sep"></div>
+      <button class="mi" id="miCopy" type="button" role="menuitem">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg>
+        <span id="mlCopy"></span>
+      </button>
+      <button class="mi" id="miLegal" type="button" role="menuitem">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4" stroke-linecap="round"/></svg>
+        <span id="mlLegal"></span>
+      </button>
+      <button class="mi" id="miNew" type="button" role="menuitem">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        <span id="mlNew"></span>
+      </button>
+    </div>
+  </form>
+  <div class="foot" id="foot"></div>
+</aside>
+
+<div id="consent" class="glass" role="dialog" aria-labelledby="cTitle" hidden>
+  <button id="cX" class="xb" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <h2 id="cTitle"></h2><p id="cText"></p>
+  <div class="crow"><button id="cYes" class="btn pri" type="button"></button><button id="cNo" class="btn" type="button"></button></div>
+  <button id="cMore" class="lnk" type="button"></button>
+</div>
+<div id="legal" hidden>
+  <div class="lbox" role="dialog" aria-modal="true" id="lgBox">
+    <div class="lhead"><div class="seg" id="lgTabs" role="tablist"></div><button id="lgX" class="xb" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="lgBody" tabindex="-1"></div>
+  </div>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="config.js"></script>
+<script src="legal.js"></script>
+<script src="data/gta-6.js"></script>
+<script src="data/places-gta-6.js"></script>
+<script>
+var TILES='tiles/';
+
+// ---------- Dati ----------
+// Luoghi: coordinate di gioco (fonte GTADB) e parole che li richiamano.
+var RG={
+ vc:{n:'Vice City',x:-900,y:100,r:2300,a:['vice','city','citta','miami','downtown','town','centro','grattacieli']},
+ keys:{n:'Leonida Keys',x:-3300,y:-6100,r:2300,a:['keys','key','islands','island','isole','isola','lento','arcipelago']},
+ grass:{n:'Grassrivers',x:-3057,y:-4000,r:1700,a:['grassrivers','swamp','swamps','wetlands','gators','alligator','alligators','everglades','palude','paludi','alligatori','alligatore']},
+ amb:{n:'Ambrosia',x:-2762,y:3890,r:1500,a:['ambrosia','sugar','refinery','factory','zucchero','raffineria','fabbrica']},
+ pg:{n:'Port Gellhorn',x:-6483,y:3720,r:1600,a:['port','gellhorn','harbor','harbour','porto']},
+ kal:{n:'Mount Kalaga',x:-3888,y:6160,r:2000,a:['kalaga','mountain','forest','monte','montagna','mount','parco','bosco']},
+ capri:{n:'Capri',x:-6641,y:12,r:1400,a:['capri']},
+ vbeach:{n:'Vice Beach',x:1685,y:1130,r:1300,a:['beach','spiaggia']},
+ watson:{n:'Watson Bay',x:-4982,y:-3360,r:1300,a:['watson']}
+};
+// Nomi con cui i capitoli citano i luoghi (Vice Beach prima di Vice City).
+var PN=[['vbeach','vice beach'],['vc','vice city'],['keys','leonida keys'],['keys','the keys'],['grass','grassrivers'],['grass','grass rivers'],['pg','port gellhorn'],['amb','ambrosia'],['kal','kalaga'],['capri','capri'],['watson','watson bay']];
+var K={tgg:'irzbYa_Dr2U',sim:'xelYw9ibrAE',sig:'pQmS52ybSyY',rob:'gGvMUEJjKCs',khr:'jig5CieTmnM',t5g:'3hqDA8v3qac',wild:'jAAmtgOVfYc',wan:'6479C0sBeck'};
+// Domande curate: risposte scelte a mano dentro capitoli reali [video, inizio, fine].
+var QN=[
+ {q:{en:'How do I lose the cops?',it:'Come semino la polizia?'},a:['police','cops','lose','escape','evade'],c:[['tgg',1481,1513],['wan',190,230]]},
+ {q:{en:'What do the wanted-star colours mean?',it:'Cosa significano i colori delle stelle?'},a:['stars','star','wanted','colours','colors'],c:[['tgg',1319,1364],['wan',154,190]]},
+ {q:{en:'How do shop robberies work?',it:'Come funzionano le rapine ai negozi?'},a:['robbery','robberies','shop','store'],c:[['tgg',806,826]]},
+ {q:{en:'How do I open safes?',it:'Come apro le casseforti?'},a:['safe','safes','codes','crack'],c:[['tgg',826,885]]},
+ {q:{en:'How do I plan a heist?',it:'Come pianifico un colpo?'},a:['plan','planning','heist','heists'],c:[['tgg',885,912]]},
+ {q:{en:'Where do I sell stolen goods?',it:'Dove vendo la refurtiva?'},a:['sell','stolen','goods','fence'],c:[['tgg',739,765]]},
+ {q:{en:'How do I launder money?',it:'Come riciclo il denaro?'},a:['launder','laundering','dirty'],c:[['tgg',765,806]]},
+ {q:{en:'Where do I buy guns?',it:'Dove compro le armi?'},a:['guns','gun','weapons','buy','shops'],c:[['tgg',1629,1647]]},
+ {q:{en:'How do I steal a car?',it:'Come rubo un\'auto?'},a:['steal','car','cars','carjacking','lockpicking','hotwiring','theft'],c:[['tgg',2024,2059],['tgg',2059,2109]]},
+ {q:{en:'Who are Jason and Lucia?',it:'Chi sono Jason e Lucia?'},a:['jason','lucia','protagonists','main','characters'],c:[['tgg',372,420]]},
+ {q:{en:'How do I switch characters?',it:'Come cambio personaggio?'},a:['switch','switching','character','characters'],c:[['tgg',440,465]]},
+ {q:{en:'Can I go inside buildings?',it:'Si può entrare negli edifici?'},a:['enter','inside','buildings','interiors','enterable'],c:[['tgg',326,372]]},
+ {q:{en:'How big is the map?',it:'Quanto è grande la mappa?'},a:['big','size','large','huge','map'],c:[['tgg',97,153],['rob',34,96],['sim',132,259],['sig',334,396]]},
+ {q:{en:'How do I get around Leonida?',it:'Come ci si sposta in Leonida?'},a:['travel','around','transport','getting'],c:[['sim',1132,1278],['sig',396,428]]},
+ {q:{en:'What is in the Ultimate Edition?',it:'Cosa c\'è nell\'edizione Ultimate?'},a:['edition','editions','ultimate','version'],c:[['khr',112,160]]},
+ {q:{en:'What do the pre-order bonuses give?',it:'Cosa danno i bonus del pre-ordine?'},a:['preorder','pre','order','bonus','bonuses'],c:[['khr',33,84]]},
+ {q:{en:'Will GTA Online be there at launch?',it:'Ci sarà GTA Online al lancio?'},a:['online','multiplayer','launch','standalone'],c:[['t5g',73,178]]},
+ {q:{en:'What animals are in Leonida?',it:'Quali animali ci sono a Leonida?'},a:['wildlife','animals','gators','sharks'],c:[['tgg',2980,3042],['wild',0,53]]}
+];
+var TOURW=['tour','every','regions','region','explore','whole','locations','leonida','visit'];
+var SUGG=[12,16,14,'tour'];
+// Dizionario: parole italiane e sinonimi inglesi verso le parole usate nei capitoli dei creatori.
+var DICT={
+ polizia:'police cops wanted heat',poliziotti:'police cops',sbirri:'cops police',cops:'police',police:'cops',seminare:'lose escape',semino:'lose escape',sfuggire:'lose escape evade',scappare:'lose escape',fuggire:'escape lose',escape:'lose',
+ stelle:'stars wanted',stella:'star wanted',ricercato:'wanted',ricercati:'wanted',taglia:'wanted',arrestato:'busted',arresto:'busted',testimoni:'witnesses',
+ soldi:'money cash',denaro:'money cash',contanti:'cash money',banca:'bank banking',riciclare:'laundering launder',comprare:'buy shops',compro:'buy shops',acquistare:'buy shops',vendere:'sell selling fence',vendo:'sell fence',riciclo:'laundering',riciclaggio:'laundering',guadagnare:'money earn',spendere:'spending spend',economia:'economy money',money:'cash',cash:'money',
+ rapina:'robbery robberies heist rob',rapine:'robberies robbery heists',rapinare:'rob robbery',colpo:'heist heists',colpi:'heists heist',negozio:'shop store',negozi:'shops stores',cassaforte:'safe safes',casseforti:'safes safe',codice:'codes',refurtiva:'stolen goods',ricettatore:'fence fences',heist:'robbery',robbery:'heist',
+ armi:'weapons guns weapon gun',arma:'weapon gun',pistola:'pistol pistols',pistole:'pistols pistol',fucile:'rifle rifles shotgun',fucili:'rifles shotguns',mitra:'smg submachine',cecchino:'sniper',esplosivi:'explosive throwables',granate:'throwables explosive',corpo:'melee',armeria:'gun shops',guns:'weapons',weapons:'guns',
+ auto:'car cars vehicle vehicles',macchina:'car cars vehicle',macchine:'cars vehicles',veicolo:'vehicle vehicles',veicoli:'vehicles vehicle',rubare:'steal stealing theft',rubo:'steal theft',furto:'theft stealing carjacking',moto:'motorcycle bike',barca:'boat boats',barche:'boats boat',aereo:'plane airport',aeroporto:'airport',benzina:'fuel gas',carburante:'fuel gas',garage:'garages',officina:'mod shops modshops',personalizzare:'customisation customization',tuning:'mod customisation',guidare:'driving',guida:'driving',corse:'racing race',gara:'racing race',gare:'racing',traffico:'traffic',autobus:'transport public',trasporti:'transport public',cars:'vehicles',vehicles:'cars',
+ personaggi:'characters character',personaggio:'character characters',protagonisti:'jason lucia protagonists',protagonista:'protagonist jason lucia',cambiare:'switching switch',cambio:'switch switching',storia:'story',trama:'story',missioni:'missions mission',missione:'mission missions',finale:'ending',amore:'romance relationship',relazione:'relationship relationships',
+ mappa:'map',grande:'size big',grandezza:'size',dimensioni:'size',luoghi:'locations places',posti:'locations places',zone:'locations zones',regioni:'regions',citta:'city cities',spiaggia:'beach',palude:'swamp grassrivers',paludi:'swamp grassrivers',montagna:'mountain kalaga',isole:'keys islands',segreti:'easter secrets',misteri:'mystery easter',
+ animali:'wildlife animals',fauna:'wildlife animals',alligatori:'gators alligators',coccodrilli:'gators alligators',squali:'sharks',caccia:'hunting',pesca:'fishing',uragano:'hurricanes storm',uragani:'hurricanes storm',meteo:'weather',
+ online:'online multiplayer',multiplayer:'online',uscita:'release',esce:'release',prezzo:'price',costa:'price',edizione:'edition',edizioni:'editions',preordine:'preorder bonus',prenotazione:'preorder',prestazioni:'performance',grafica:'performance',
+ palestra:'gym fitness exercise',allenamento:'gym exercise',cibo:'food',mangiare:'food',dormire:'sleep',capelli:'haircuts hair',barbiere:'haircuts',vestiti:'clothing outfits',abiti:'clothing outfits',casa:'safehouse safehouses houses apartment',case:'safehouse safehouses houses',rifugio:'safehouse safehouses houses hideout',rifugi:'safehouse safehouses houses hideout',covo:'safehouse hideout',pegni:'pawn pawnshop',pegno:'pawn pawnshop',banco:'pawn',dura:'length hours long',durata:'length hours long',longevita:'length hours',ore:'hours length',appartamento:'apartment',telefono:'phones apps',social:'social media',foto:'photo',discoteca:'nightclubs nightclub club',locali:'nightclubs nightlife',vita:'life',notturna:'nightlife',attivita:'activities sports',sport:'sports activities',immersioni:'diving underwater',basket:'basketball',fiducia:'trust',giro:'tour explore',esplora:'explore tour',esplorare:'explore tour',visita:'visit tour',visitare:'visit tour',regione:'region regions',muoversi:'getting around',spostarsi:'getting around travel'
+};
+// Testi dell'interfaccia. Per aggiungere una lingua basta un altro blocco.
+var T={
+ en:{name:'English',loc:'en-US',claim:'Right info. Zipped.',heroT:'What are you looking for in Leonida?',heroP:'Ask in your own words or tap a place on the map.',ph:'Ask about places, missions, tips...',lang:'Language',follow:'Map follows the video',dFollow:'Moves to the places the video talks about',dShield:'Blurs previews that may reveal the story',copy:'Copy link to this zip',copied:'Link copied',shield:'Spoiler shield',tour:'Take me on a tour of Leonida',info:'Info and credits',by:'An AXIX\u00ae product',aiT:'AI-found minutes',closeV:'Close video',more:'More options',send:'Send',plus:' and subtitles',newc:'New chat',live:'Live: the map is dynamic and follows what the video covers:',z1:' zip',zn:' zips',sorted:', sorted by helpfulness',start:'Start here',startSub:'Full tours of Leonida: the map travels with the video',none:'No zip answers this yet. Try one of these:',spot:'{n}{s} is here on the map.',spotZ:'These zips are about {r}.',spotD:'{c} zips are about this very place.',spotD1:'One zip is about this very place.',zipsN:'{c} zips about this place',zips1:'1 zip about this place',unv:'Unverified information',rw:'In real life: {w}',cat:{landmark:'Landmark',hotel:'Hotel',restaurant:'Restaurant',leisure:'Leisure',events:'Events',retail:'Shop',transportation:'Transport',government:'Government',public:'Public building',natural:'Nature',industrial:'Industrial',utilities:'Utilities',office:'Offices',residential:'Residential'},found:'Found {n}{p}. Playing the most helpful one.',on:' about ',tourT:'Tour of Leonida',places:' places',from:'from ',lasts:'lasts ',views:' views',hid:'Title hidden by the shield',my1:'Helpful for you',my0:'Not helpful for you',fbq:'Did it help?',yes:'Yes',no:'No',lo:'Original audio in English',ld:'English subtitles on \u00b7 English audio in \u2699 \u203a Audio track',ls:'English subtitles, translated by YouTube',ln:'Translations into English are not available for this video.',to:'EN',td:'EN subs + audio',ts:'EN subs',tn:'Original language only',foot:'ZipTube is an AXIX\u00ae product. Unofficial site, not affiliated with Rockstar Games or Take-Two. Videos stay on YouTube and belong to their creators. Order: share of helpful votes, then views. Votes are anonymous. Questions are logged without personal data, to decide which videos to add.',footMap:' The map is a community reconstruction (YANIS v17, GTADB, CC BY 4.0), not an official map.',cTitle:'Before you start',cText:'ZipTube plays the right piece of YouTube videos, inside the site. To do so it loads previews and videos from YouTube (Google), which may use cookies. Without them you still find the zips and open them on YouTube. By using ZipTube you accept the Terms of use and the Privacy notice.',cYes:'Accept YouTube videos',cNo:'Only what is necessary',cMore:'Privacy, cookies and terms',legal:'Privacy and terms',prefsL:'Cookie settings',ytNeed:'To watch this video here, turn on YouTube videos. YouTube (Google) may use cookies.',ytOn:'Turn on YouTube videos',ytOpen:'Or open it on YouTube at ',pNec:'Necessary storage',pNecD:'Language, settings, your votes. Always on',pYt:'YouTube videos and previews',pYtD:'Loaded from Google servers, which may use cookies',pCode:'Your anonymous code for votes: ',pNoCode:'none yet, it is created at your first vote',pDel:'Delete my data',pDone:'Done: votes and code deleted from this device and from our database.',closeL:'Close',priv:'Privacy and cookies',privT:'ZipTube uses no cookies of its own, no advertising and no tracking tools. Your device only keeps your language, your settings, your votes and a random anonymous code used to count each vote once. Votes and the text of questions are recorded anonymously to improve the answers: please do not write personal data in your questions. Videos and previews come from YouTube (Google): when you start a video, YouTube receives your IP address and may use its own cookies under its own rules. Data controller: AXIX.',ft:'The video cannot play here.',fbody:'YouTube blocks playback in pages opened with a double click. Close this page and open ZipTube with the file "Apri ZipTube.command".',fl:'Meanwhile, open it on YouTube from minute '},
+ it:{name:'Italiano',loc:'it-IT',claim:'Right info. Zipped.',heroT:'Cosa cerchi a Leonida?',heroP:'Chiedi con parole tue o tocca un luogo sulla mappa.',ph:'Chiedi di luoghi, missioni, trucchi...',lang:'Lingua',follow:'La mappa segue il video',dFollow:'Si sposta sui luoghi di cui parla il video',dShield:'Sfoca le anteprime che possono svelare la trama',copy:'Copia il link a questo zip',copied:'Link copiato',shield:'Scudo anti-spoiler',tour:'Fammi fare il giro di Leonida',info:'Info e crediti',by:'Un prodotto AXIX\u00ae',aiT:'minuti trovati da AI',closeV:'Chiudi video',more:'Altre opzioni',send:'Invia',plus:' e sottotitoli',newc:'Nuova chat',live:'Live: La mappa è dinamica e segue i contenuti del video:',z1:' zip',zn:' zip',sorted:', in ordine di utilità',start:'Inizia da qui',startSub:'Giri completi di Leonida: la mappa viaggia con il video',none:'Nessuno zip risponde ancora a questo. Prova con una di queste:',spot:'{n}{s} \u00e8 qui sulla mappa.',spotZ:'Questi zip parlano di {r}.',spotD:'{c} zip parlano proprio di questo luogo.',spotD1:'Uno zip parla proprio di questo luogo.',zipsN:'{c} zip su questo luogo',zips1:'1 zip su questo luogo',unv:'Informazione non verificata',rw:'Nella realt\u00e0: {w}',cat:{landmark:'Punto di riferimento',hotel:'Hotel',restaurant:'Ristorante',leisure:'Svago',events:'Eventi',retail:'Negozio',transportation:'Trasporti',government:'Edificio governativo',public:'Edificio pubblico',natural:'Natura',industrial:'Zona industriale',utilities:'Servizi',office:'Uffici',residential:'Residenziale'},found:'Ho trovato {n}{p}. Parte il più utile.',on:' su ',tourT:'Giro di Leonida',places:' luoghi',from:'dal minuto ',lasts:'dura ',views:' visual.',hid:'Titolo nascosto dallo scudo',my1:'Ti ha aiutato',my0:'Non ti ha aiutato',fbq:'Ti ha aiutato?',yes:'Sì',no:'No',lo:'Audio originale in italiano',ld:'Sottotitoli in italiano attivi \u00b7 audio italiano in \u2699 \u203a Traccia audio',ls:'Sottotitoli in italiano, tradotti da YouTube',ln:'Per questo video le traduzioni in italiano non sono disponibili.',to:'IT',td:'Sottotitoli + audio IT',ts:'Sottotitoli IT',tn:'Solo lingua originale',foot:'ZipTube \u00e8 un prodotto AXIX\u00ae. Sito non ufficiale, non affiliato a Rockstar Games o Take-Two. I video restano su YouTube e sono dei rispettivi creatori. Ordine: quota di voti utili, poi visualizzazioni. I voti sono anonimi. Le domande vengono registrate senza dati personali, per decidere quali video aggiungere.',footMap:' La mappa \u00e8 una ricostruzione della comunit\u00e0 (YANIS v17, GTADB, CC BY 4.0), non una mappa ufficiale.',cTitle:'Prima di iniziare',cText:'ZipTube ti fa vedere il pezzo giusto dei video di YouTube, dentro il sito. Per farlo carica anteprime e video da YouTube (Google), che pu\u00f2 usare cookie. Senza, trovi comunque gli zip e li apri su YouTube. Usando ZipTube accetti i Termini d\u2019uso e l\u2019Informativa privacy.',cYes:'Accetta i video di YouTube',cNo:'Solo il necessario',cMore:'Privacy, cookie e termini',legal:'Privacy e termini',prefsL:'Preferenze cookie',ytNeed:'Per vedere questo video qui, attiva i video di YouTube. YouTube (Google) pu\u00f2 usare cookie.',ytOn:'Attiva i video di YouTube',ytOpen:'Oppure aprilo su YouTube al minuto ',pNec:'Memoria necessaria',pNecD:'Lingua, impostazioni, i tuoi voti. Sempre attiva',pYt:'Video e anteprime di YouTube',pYtD:'Caricati dai server di Google, che pu\u00f2 usare cookie',pCode:'Il tuo codice anonimo per i voti: ',pNoCode:'nessuno, si crea al tuo primo voto',pDel:'Cancella i miei dati',pDone:'Fatto: voti e codice cancellati da questo dispositivo e dalla nostra banca dati.',closeL:'Chiudi',priv:'Privacy e cookie',privT:'ZipTube non usa cookie propri, pubblicit\u00e0 o strumenti di tracciamento. Sul tuo dispositivo restano solo la lingua, le impostazioni, i tuoi voti e un codice casuale anonimo che serve a contare ogni voto una volta sola. I voti e il testo delle domande vengono registrati in forma anonima per migliorare le risposte: non scrivere dati personali nelle domande. Video e anteprime arrivano da YouTube (Google): quando avvii un video, YouTube riceve il tuo indirizzo IP e pu\u00f2 usare i propri cookie secondo le sue regole. Titolare del trattamento: AXIX.',ft:'Qui il video non può partire.',fbody:'YouTube blocca la riproduzione nelle pagine aperte con doppio clic. Chiudi questa pagina e apri ZipTube con il file "Apri ZipTube.command".',fl:'Intanto aprilo su YouTube dal minuto '}
+};
+
+// ---------- Zip: ogni capitolo utile di ogni video diventa uno zip ----------
+var STOP=['gioco','game','the','and','how','what','where','who','can','does','are','for','with','about','you','your','its','into','gta','explained','there','dove','come','cosa','sono','della','delle','degli','nel','nella','per','che','chi','una','uno','gli','dei','del','sul','sulla','trovo','posso','fare','quanto','quali','quale','sara','alla','alle','con','tra','fra','non','piu','mio','mia','fammi','leonida','mostrami','voglio','vorrei'];
+function norm(x){return x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+function words(x){return norm(x).split(/[^a-z0-9]+/).filter(function(w){return w.length>2&&STOP.indexOf(w)<0})}
+var GENERIC=/^(intro|outro|introduction|coming up|final thoughts|closing thoughts|thank|i was wrong|see you|summary|trailer conclusion)/i;
+function placeOf(title){var n=norm(title);if(n.split(' ').length>6||/vintage/.test(n))return '';for(var i=0;i<PN.length;i++)if(n.indexOf(PN[i][1])>=0)return PN[i][0];return ''}
+var V={};
+// L'archivio arriva dal motore (data/<gioco>.js): capitoli come [secondo, titolo, luogo, parole di ricerca].
+((window.ZT_DATA||{}).videos||[]).forEach(function(d){
+ V[d.id]={id:d.id,who:d.who,views:d.views,len:d.len,t:d.t,ai:d.src==='ai',L:{o:d.lang||'en',d:d.dub||[],t:true},
+  ch:d.ch.map(function(c){return [c[0],RG[c[2]]?c[2]:'',c[1],c[3]||'',c.length>3&&c[3]==='']})}});
+var ZIPS=[],BY={};
+Object.keys(V).forEach(function(id){var v=V[id];
+ // Fuori i capitoli lampo, le sigle e quelli che il motore ha marcato come estranei al gioco (parole di ricerca vuote).
+ // Uno zip dura almeno 25 secondi: se il capitolo e' piu' corto, si continua a guardare nel capitolo dopo.
+ v.ch.forEach(function(c,i){var e=v.ch[i+1]?v.ch[i+1][0]:v.len;if(e-c[0]<8||c[4]||GENERIC.test(c[2]))return;e=Math.max(e,Math.min(v.len,c[0]+25));
+  var z={v:v,s:c[0],e:e,type:c[1]?'place':'ch',k:c[1]||null,title:c[2],kw:words(c[2]).concat(c[1]?RG[c[1]].a:[]).concat(words(c[3]))};ZIPS.push(z);BY[id+'|'+c[0]]=z});
+ // Giro: un video che attraversa almeno quattro luoghi diventa anche un giro di Leonida.
+ var pc=v.ch.filter(function(c){return c[1]}),dist=[];pc.forEach(function(c){if(dist.indexOf(c[1])<0)dist.push(c[1])});
+ if(dist.length>=4){var last=v.ch.indexOf(pc[pc.length-1]);ZIPS.push({v:v,s:pc[0][0],e:v.ch[last+1]?v.ch[last+1][0]:v.len,type:'tour',kw:TOURW,title:''})}
+});
+QN.forEach(function(q,i){q.c.forEach(function(c){var id=K[c[0]],z=BY[id+'|'+c[1]];if(!V[id])return;
+ if(z){z.q=i;z.type=z.k?'place':'q';z.kw=z.kw.concat(q.a)}else ZIPS.push({v:V[id],s:c[1],e:c[2],type:'q',q:i,kw:q.a,title:''})})});
+ZIPS.forEach(function(z){z.path=[];z.v.ch.forEach(function(c,i){var ce=z.v.ch[i+1]?z.v.ch[i+1][0]:z.v.len;if(ce>z.s&&c[0]<z.e)z.path.push(c)});z.pl=[];z.path.forEach(function(p){if(p[1]&&z.pl[z.pl.length-1]!==p[1])z.pl.push(p[1])})});
+
+// ---------- Stato ----------
+var store={get:function(k,d){try{var x=localStorage.getItem(k);return x==null?d:JSON.parse(x)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del:function(k){try{localStorage.removeItem(k)}catch(e){}}};
+var votes=store.get('zt_votes3',{}),follow=store.get('zt_follow',true),shield=store.get('zt_shield',false);
+var lang=store.get('zt_lang',(navigator.language||'en').slice(0,2));if(!T[lang])lang='en';
+var blocks=[],player=null,pending=null,now=null,lastKey,trail,anim;
+var LG=window.ZT_LEGAL||{version:1,updated:'2026-11-14'},consent=store.get('zt_consent',null);
+function t(k){return T[lang][k]}
+function $(id){return document.getElementById(id)}
+function el(tag,c,x){var e=document.createElement(tag);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function mmss(s){var m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+(x<10?'0':'')+x}
+function wide(){return innerWidth>820}
+function cnt(n){return n+t(n===1?'z1':'zn')}
+function what(z){if(z.q!=null&&z.type!=='place')return QN[z.q].q[lang];if(z.type==='tour')return t('tourT')+' · '+z.pl.length+t('places');if(z.type==='place'){var n=RG[z.k].n;return z.title.length>n.length+14?z.title:n}return z.title}
+function views(n){return new Intl.NumberFormat(t('loc'),{notation:'compact',maximumFractionDigits:1}).format(n)+t('views')}
+
+// ---------- Mappa ----------
+function ll(x,y){return L.latLng(-(16384-y)/128,(x+16384)/128)}
+function cen(k){return ll(RG[k].x,RG[k].y)}
+// Zoom fluido con la rotella o il trackpad: invece di saltare da un livello all'altro, la mappa insegue
+// il livello richiesto fotogramma per fotogramma, tenendo fermo il punto sotto il cursore.
+L.Map.SmoothWheel=L.Handler.extend({
+ // Rotella, due dita sul trackpad e pizzico (Chrome e Firefox lo mandano come rotella con Ctrl, Safari come "gesture").
+ addHooks:function(){var c=this._map._container;L.DomEvent.on(c,'wheel',this._wheel,this);
+  L.DomEvent.on(c,'gesturestart',this._gs,this);L.DomEvent.on(c,'gesturechange',this._gc,this);L.DomEvent.on(c,'gestureend',this._gc,this)},
+ removeHooks:function(){var c=this._map._container;L.DomEvent.off(c,'wheel',this._wheel,this);
+  L.DomEvent.off(c,'gesturestart',this._gs,this);L.DomEvent.off(c,'gesturechange',this._gc,this);L.DomEvent.off(c,'gestureend',this._gc,this)},
+ _begin:function(e){var m=this._map;
+  if(!this._on){this._on=true;this._moved=false;m._stop();if(m._panAnim)m._panAnim.stop();
+   this._goal=m.getZoom();this._mouse=m.mouseEventToContainerPoint(e);this._half=m.getSize()._divideBy(2);
+   this._anchor=m.containerPointToLatLng(this._mouse);this._pc=m.getCenter();this._pz=m.getZoom();
+   this._raf=requestAnimationFrame(L.bind(this._step,this))}
+  clearTimeout(this._t);this._t=setTimeout(L.bind(this._end,this),180);
+  L.DomEvent.preventDefault(e);L.DomEvent.stopPropagation(e)},
+ _wheel:function(e){var m=this._map,d;this._begin(e);
+  // Pizzico: il browser manda spostamenti piccoli, dove 100 punti valgono un fattore e. Lo seguiamo uno a uno.
+  if(e.ctrlKey&&e.deltaMode===0)d=Math.max(-.5,Math.min(.5,-e.deltaY*.0144));
+  else d=L.DomEvent.getWheelDelta(e)*.0032;
+  this._goal=this._lim(this._goal+d)},
+ // Limiti senza arrotondare ai quarti di livello: altrimenti i movimenti piccoli del trackpad andrebbero persi.
+ _lim:function(z){var m=this._map;return Math.max(m.getMinZoom(),Math.min(m.getMaxZoom(),z))},
+ _gs:function(e){this._g0=this._on?this._goal:this._map.getZoom();this._begin(e)},
+ _gc:function(e){if(this._g0==null)this._g0=this._map.getZoom();this._begin(e);
+  if(e.scale>0)this._goal=this._lim(this._g0+Math.log(e.scale)/Math.LN2);if(e.type==='gestureend')this._g0=null},
+ _end:function(){this._on=false;cancelAnimationFrame(this._raf);if(this._moved)this._map._moveEnd(true)},
+ _step:function(){var m=this._map;
+  if(!m.getCenter().equals(this._pc)||m.getZoom()!==this._pz)return; // qualcun altro sta muovendo la mappa: lasciamo fare
+  var z=m.getZoom()+(this._goal-m.getZoom())*.28;if(Math.abs(this._goal-z)<.004)z=this._goal;z=Math.round(z*1000)/1000;
+  if(z!==m.getZoom()){var d=this._mouse.subtract(this._half),c=m.unproject(m.project(this._anchor,z).subtract(d),z);
+   if(!this._moved){m._moveStart(true,false);this._moved=true}
+   m._move(c,z);this._pc=m.getCenter();this._pz=m.getZoom()}
+  this._raf=requestAnimationFrame(L.bind(this._step,this))}
+});
+L.Map.addInitHook('addHandler','smoothWheel',L.Map.SmoothWheel);
+var map=L.map('map',{crs:L.CRS.Simple,minZoom:1,maxZoom:8,zoomSnap:.25,zoomControl:false,scrollWheelZoom:false,smoothWheel:true,maxBounds:[[-520,-420],[280,620]]});
+L.control.zoom({position:'bottomleft'}).addTo(map);
+var tiles=L.tileLayer(TILES+'{z}/{y}/{x}.jpg',{minZoom:1,minNativeZoom:2,maxZoom:8,maxNativeZoom:7,zoomOffset:-2,noWrap:true,bounds:[[-199.9,42.1],[-42.1,154.5]],attribution:'Community map: YANIS v17, tiles by <a href="https://map.gtadb.org" target="_blank" rel="noopener">GTADB</a> and contributors (CC BY 4.0), legend removed<span class="ni" tabindex="0" role="button">i</span>'}).addTo(map);
+// Una tessera che non arriva viene richiesta una seconda volta, invece di lasciare un riquadro vuoto.
+tiles.on('tileerror',function(e){var im=e.tile;if(im&&!im._again){im._again=1;setTimeout(function(){im.src=e.tile.src.split('?')[0]+'?r=1'},700)}});
+trail=L.layerGroup().addTo(map);
+function pad(){if(wide()&&document.body.classList.contains('playing'))return {paddingTopLeft:[40,90],paddingBottomRight:[innerWidth/2+40,40]};return wide()?{paddingTopLeft:[40,100],paddingBottomRight:[470,40]}:{paddingTopLeft:[10,64],paddingBottomRight:[10,Math.min($('side').offsetHeight,innerHeight*.66)+18]}}
+function fitAll(a){var o=pad();o.animate=!!a;o.duration=1.2;map[a?'flyToBounds':'fitBounds'](L.latLngBounds(ll(-10200,-7600),ll(2400,8200)),o)}
+function flyTo(k){var r=RG[k],o=pad();o.duration=1.3;map.flyToBounds(L.latLngBounds(ll(r.x-r.r,r.y-r.r),ll(r.x+r.r,r.y+r.r)),o)}
+var pins={};
+Object.keys(RG).forEach(function(k){
+ var n=ZIPS.filter(function(z){return z.k===k}).length;if(!n)return;
+ var d=el('div','pin');d.appendChild(el('i',null,n));d.appendChild(document.createTextNode(RG[k].n));pins[k]=d;
+ L.marker(cen(k),{icon:L.divIcon({className:'',html:d,iconSize:[0,0]}),title:RG[k].n,zIndexOffset:500}).addTo(map).on('click',function(){ask(RG[k].n)});
+});
+function paintPins(on){Object.keys(pins).forEach(function(k){pins[k].classList.toggle('sel',!!on&&on.length===1&&on[0]===k);pins[k].classList.toggle('dim',!!on&&on.length>0&&on.indexOf(k)<0);pins[k].classList.toggle('live',k===lastKey)})}
+// Viaggio: una linea ad arco che cresce dal luogo precedente a quello di cui parla ora il video.
+function travel(a,b){
+ if(anim)cancelAnimationFrame(anim);
+ trail.eachLayer(function(l){if(l.setStyle)l.setStyle({opacity:.35,fillOpacity:.35})});
+ var A=cen(a),B=cen(b),dx=B.lng-A.lng,dy=B.lat-A.lat,C=L.latLng((A.lat+B.lat)/2+dx*.22,(A.lng+B.lng)/2-dy*.22);
+ function q(u){var w=1-u;return L.latLng(w*w*A.lat+2*w*u*C.lat+u*u*B.lat,w*w*A.lng+2*w*u*C.lng+u*u*B.lng)}
+ var line=L.polyline([A],{color:'#f5c59d',weight:4,opacity:.95,lineCap:'round',interactive:false}).addTo(trail);
+ var dot=L.circleMarker(A,{radius:7,color:'#fff',weight:2,fillColor:'#d77b89',fillOpacity:1,interactive:false}).addTo(trail);
+ if(follow){var o=pad();o.duration=1;map.flyToBounds(L.latLngBounds([A,B,C]),o)}
+ var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,t0=performance.now(),D=reduce?1:2200;
+ (function step(n){var u=Math.min(1,(n-t0)/D),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2,pts=[];for(var i=0;i<=24;i++)pts.push(q(e*i/24));line.setLatLngs(pts);dot.setLatLng(q(e));
+  if(u<1)anim=requestAnimationFrame(step);else{anim=null;dot.remove();if(follow)setTimeout(function(){if(lastKey===b)flyTo(b)},250)}})(t0);
+}
+
+// ---------- Luoghi con nome (dati GTADB, senza materiale da fughe di notizie) ----------
+// Zone dei dati collegate ai nostri segnaposti: solo quelle confermate dai nomi nei dati stessi.
+var A2R={'vice-city':'vc','port-vice-city':'vc','vice-city-international-airport':'vc','vice-beach':'vbeach','port-gellhorn':'pg','gellhorn-international-raceway':'pg','ambrosia':'amb','lummox-county':'kal','key-lento':'keys','mariana-county':'grass','watson-bay':'watson','capri':'capri'};
+var PLD=window.ZT_PLACES||{places:[],areas:[]},AREA={},SPOTS=[],placeMk=null;
+PLD.areas.forEach(function(a){AREA[a.id]=a;if(a.count>0&&a.id!=='leonida')SPOTS.push({name:a.name,isArea:true,x:a.x,y:a.y,u:a.u,r:Math.max(a.r,500),area:a.kind==='district'?a.parent:a.id,sub:a.kind==='district'&&AREA[a.parent]?AREA[a.parent].name:''})});
+function nkey(x){return norm(x).replace(/[^a-z0-9]+/g,' ').trim()}
+(function(){
+ var seen={};PLD.places.forEach(function(p){var n=norm(p.name);(seen[n]=seen[n]||[]).n=(seen[n].n||0)+1});
+ var canvas=L.canvas({padding:.3}),layer=L.layerGroup(),rows=[];
+ PLD.places.forEach(function(p){
+  var sub=[p.district&&AREA[p.district]?AREA[p.district].name:'',p.area&&AREA[p.area]?AREA[p.area].name:''].filter(Boolean).join(', ');
+  var g=seen[norm(p.name)],sp=null;g.push(p);
+  if(g.n===1&&norm(p.name).length>=5){sp={name:p.name,x:p.x,y:p.y,r:260,area:p.area,sub:sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street};p._sp=sp}
+  // Stesso nome su piu' punti vicini (un complesso, una statua e il suo negozio): un solo luogo cercabile, al centro.
+  else if(g.n>1&&g.length===g.n&&norm(p.name).length>=5){var xs=g.map(function(q){return q.x}),ys=g.map(function(q){return q.y}),w=Math.max(Math.max.apply(0,xs)-Math.min.apply(0,xs),Math.max.apply(0,ys)-Math.min.apply(0,ys));
+   if(w<=700){sp={name:p.name,x:(Math.max.apply(0,xs)+Math.min.apply(0,xs))/2,y:(Math.max.apply(0,ys)+Math.min.apply(0,ys))/2,r:260+w/2,area:p.area,sub:AREA[p.area]?AREA[p.area].name:'',u:g.every(function(q){return q.u})?1:0};g.forEach(function(q){q._sp=sp})}}
+  if(sp)SPOTS.push(sp);
+  rows.push([p,sub]);
+ });
+ SPOTS.sort(function(a,b){return b.name.length-a.name.length});
+ // Zip e luoghi: se il titolo di un capitolo nomina un luogo preciso della mappa, quello zip appartiene a quel luogo.
+ // Restano fuori i nomi troppo comuni (ponte, parcheggio...) e le regioni che hanno gia' il loro segnaposto.
+ var GEN=/^(bridge|bus stop|parking lot|gas station|train station|metro station|water tower|construction site|radio tower|cell tower|tennis court|police station|train bridge|prison building|lifeguard tower|boat ramp|guard booth|parking garage|radio mast|train tunnel|refinery|waterfall|lighthouse|breakwater|drawbridge|airfield|warehouse|footbridge|downtown|leonida|welcome sign|baseball field|football stadium|mexican restaurant|gate building|prison|marina|stadium|airport)$/;
+ var named=SPOTS.filter(function(s){var k=nkey(s.name);return !GEN.test(k)&&k.length>=(s.isArea?6:8)&&!(RG[A2R[s.area]]&&nkey(RG[A2R[s.area]].n)===k)}).map(function(s){return [' '+nkey(s.name)+' ',s]});
+ ZIPS.forEach(function(z){if(!z.title)return;var tt=' '+nkey(z.title)+' ';for(var i=0;i<named.length;i++)if(tt.indexOf(named[i][0])>=0){z.spot=named[i][1];z.spot.zips=(z.spot.zips||0)+1;break}});
+ rows.forEach(function(r){var p=r[0],sub=r[1],sp=p._sp,has=sp&&sp.zips;
+  // Con video: punto grande rosa. Verificato: punto chiaro pieno. Non verificato: punto scuro con anello chiaro, e la finestrella lo dice.
+  L.circleMarker(ll(p.x,p.y),has?{renderer:canvas,radius:6.5,color:'#fff',weight:2,fillColor:'#d77b89',fillOpacity:1}:p.u?{renderer:canvas,radius:4.5,color:'#f5c59d',weight:2,fillColor:'#101818',fillOpacity:.95}:{renderer:canvas,radius:4,color:'#101818',weight:1.5,fillColor:'#f5c59d',fillOpacity:.95})
+   .bindTooltip(function(){var d=el('div',null,p.name+(sub?' \u00b7 '+sub:''));if(has)d.appendChild(el('small',null,t(sp.zips===1?'zips1':'zipsN').replace('{c}',sp.zips)));if(p.u){var m=el('small');m.appendChild(ni());m.appendChild(document.createTextNode(t('unv')));d.appendChild(m)}return d},{direction:'top',className:'ptip',offset:[0,-4]})
+   .on('click',function(){ask(p.name,sp||{name:p.name,x:p.x,y:p.y,r:260,area:p.area,sub:sub,u:p.u,rw:p.rw,cat:p.cat,street:p.street})}).addTo(layer);
+ });
+ function sync(){var on=map.getZoom()>=4.75;if(on&&!map.hasLayer(layer))layer.addTo(map);if(!on&&map.hasLayer(layer))map.removeLayer(layer)}
+ map.on('zoomend',sync);sync();
+})();
+// Il luogo con nome citato nella domanda (il nome piu' lungo vince), se non e' gia' uno dei nostri segnaposti.
+function findSpot(text){var n=' '+norm(text).replace(/[^a-z0-9]+/g,' ')+' ';
+ for(var i=0;i<SPOTS.length;i++){var s=SPOTS[i],k=norm(s.name).replace(/[^a-z0-9]+/g,' ').trim();if(k.length>=5&&n.indexOf(' '+k+' ')>=0)return s}return null}
+// ---------- (i) Informazione non verificata ----------
+function ni(){var s=el('span','ni','i');s.tabIndex=0;s.setAttribute('role','button');return s}
+var nitip=el('div'),niOn=null;nitip.id='nitip';nitip.hidden=true;nitip.setAttribute('role','tooltip');document.body.appendChild(nitip);
+function niShow(e){if(niOn&&niOn!==e)niOn.classList.remove('on');niOn=e;e.classList.add('on');e.setAttribute('aria-label',t('unv'));nitip.textContent=t('unv');nitip.hidden=false;
+ var r=e.getBoundingClientRect(),w=nitip.offsetWidth,h=nitip.offsetHeight,x=Math.min(Math.max(8,r.left+r.width/2-w/2),innerWidth-w-8),y=r.top-h-7;if(y<8)y=r.bottom+7;
+ nitip.style.transform='translate('+Math.round(x)+'px,'+Math.round(y)+'px)'}
+function niHide(){if(niOn)niOn.classList.remove('on');niOn=null;nitip.hidden=true}
+function niOf(ev){return ev.target&&ev.target.closest?ev.target.closest('.ni'):null}
+document.addEventListener('mouseover',function(ev){var e=niOf(ev);if(e)niShow(e)});
+document.addEventListener('mouseout',function(ev){if(niOf(ev))niHide()});
+document.addEventListener('focusin',function(ev){var e=niOf(ev);if(e)niShow(e)});
+document.addEventListener('focusout',function(ev){if(niOf(ev))niHide()});
+document.addEventListener('click',function(ev){var e=niOf(ev);if(e){ev.stopPropagation();ev.preventDefault();niShow(e)}else niHide()},true);
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape')niHide()});
+document.addEventListener('scroll',niHide,true);map.on('movestart zoomstart',niHide);
+function showSpot(s){
+ if(placeMk)placeMk.remove();
+ var d=el('div','pin sel');d.appendChild(document.createTextNode(s.name));d.style.padding='5px 12px';if(s.u){d.style.gap='0';d.appendChild(ni())}
+ placeMk=L.marker(ll(s.x,s.y),{icon:L.divIcon({className:'',html:d,iconSize:[0,0]}),zIndexOffset:900,interactive:false}).addTo(map);
+ var o=pad();o.duration=1.3;o.maxZoom=6.5;map.flyToBounds(L.latLngBounds(ll(s.x-s.r,s.y-s.r),ll(s.x+s.r,s.y+s.r)),o);
+}
+
+// ---------- Voti e ordine ----------
+function vkey(z){return z.v.id+'|'+z.s}
+// Voti condivisi: se Supabase e' configurato si usano i totali di tutti, altrimenti solo il voto di questo browser.
+var CFG=window.ZT_CONFIG||{},GAME=CFG.game||'gta-6',totals=null;
+// Ogni gioco ha il suo indirizzo: chi arriva sulla pagina principale vede ziptube.tv/games/gta-6.
+try{if(location.protocol!=='file:'&&location.pathname==='/')history.replaceState(null,'','/games/'+GAME+location.search+location.hash)}catch(e){}
+// Il codice anonimo per i voti nasce solo al primo voto, non alla prima visita.
+var device=store.get('zt_device',null);
+function dev(){if(!device){device=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'00000000-0000-4000-8000-'+('000000000000'+Math.floor(Math.random()*1e12)).slice(-12);store.set('zt_device',device)}return device}
+function rpc(fn,args){
+ if(!CFG.supabaseUrl||!CFG.supabaseKey)return Promise.resolve(null);
+ return fetch(CFG.supabaseUrl+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.supabaseKey,Authorization:'Bearer '+CFG.supabaseKey},body:JSON.stringify(args)})
+  .then(function(r){return r.ok?r.text():null}).then(function(x){try{return x?JSON.parse(x):null}catch(e){return null}}).catch(function(){return null});
+}
+function loadTotals(){return rpc('zt_totals',{p_game:GAME}).then(function(rows){if(!rows)return;totals={};rows.forEach(function(r){totals[r.zip]=[r.up,r.down]});blocks.forEach(drawBlock);markOn()})}
+function counts(z){var k=vkey(z);if(totals)return totals[k]||[0,0];var m=votes[k]||0;return [m>0?1:0,m<0?1:0]}
+function score(z){var c=counts(z);return (c[0]+2)/(c[0]+c[1]+4)}
+function rank(a,b){return score(b)-score(a)||b.v.views-a.v.views}
+function setVote(val){if(!now)return;var k=vkey(now);if(votes[k]===val)delete votes[k];else votes[k]=val;store.set('zt_votes3',votes);paintFb();blocks.forEach(drawBlock);markOn();
+ rpc('zt_vote',{p_game:GAME,p_zip:k,p_device:dev(),p_vote:votes[k]||0}).then(function(){if(CFG.supabaseUrl)loadTotals()})}
+function paintFb(){if(!now)return;$('fbY').setAttribute('aria-pressed',votes[vkey(now)]===1);$('fbN').setAttribute('aria-pressed',votes[vkey(now)]===-1)}
+$('fbY').onclick=function(){setVote(1)};$('fbN').onclick=function(){setVote(-1)};
+
+// ---------- Lingua del video: originale, poi doppiaggio, poi sottotitoli, poi avviso ----------
+function mode(v){return v.L.o===lang?'o':v.L.d.indexOf(lang)>=0?'d':v.L.t?'s':'n'}
+
+// ---------- Motore di ricerca ----------
+// Ogni parola della domanda viene ridotta alla radice e allargata con il dizionario (italiano e sinonimi inglesi).
+// Conta di piu' trovarla nel titolo del capitolo che nelle parole collegate (luogo, domanda curata).
+// Un solo errore di battitura e' tollerato sulle parole lunghe scritte dall'utente.
+function stem(w){return w.replace(/ies$/,'i').replace(/y$/,'i').replace(/(es|s)$/,'').replace(/(ing|ed)$/,'').replace(/[aeio]$/,'')}
+function lev1(a,b){if(Math.abs(a.length-b.length)>1)return false;var i=0,j=0,d=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue}if(++d>1)return false;if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++}}return d+(a.length-i)+(b.length-j)<=1}
+function near(a,b,fuzzy){return a===b||(fuzzy&&a.length>=5&&b.length>=5&&lev1(a,b))}
+function lcp(a,b){var i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;return i}
+// Parole che servono solo come traduzione ("auto" non deve trovare "auto-aim").
+var ONLYDICT=['auto','case','casa'];
+function expand(w){var x=DICT[w];
+ if(!x){var sw=stem(w),best=0;Object.keys(DICT).forEach(function(k){var sk=stem(k),l=lcp(sk,sw),sh=Math.min(sk.length,sw.length);
+  var ok=(l===sh&&sh>=4)||l>=6||(sw.length>=5&&lev1(sk,sw));if(ok&&l>best){best=l;x=DICT[k]}})}
+ var r=ONLYDICT.indexOf(w)>=0?[]:[{w:stem(w),f:true}];
+ return r.concat(x?x.split(' ').map(function(e){return {w:stem(e),f:false}}):[])}
+ZIPS.forEach(function(z){z.tw=words(z.title||'').concat(z.q!=null?QN[z.q].a:[]).concat(z.type==='tour'?TOURW:[]).map(stem);z.xw=z.kw.map(function(k){return stem(norm(k))});z.aw=words(z.v.who)});
+// Un video si propone se e' nella lingua scelta, in inglese, o doppiato nella lingua scelta.
+function okLang(z){var o=z.v.L.o;return o===lang||o==='en'||z.v.L.d.indexOf(lang)>=0}
+// Titoli che dichiarano voci, teorie o fughe di notizie: lo zip porta la (i).
+var UNV=/leak|rumou?r|theor(y|ies)|speculat|unconfirmed|prediction|teori[ae]|indiscrezion|non confermat/i;
+function engine(text){
+ var tk=words(text);if(!tk.length)return [];
+ var groups=tk.map(expand);
+ var res=ZIPS.filter(okLang).map(function(z){var s=0;
+  groups.forEach(function(g){var best=0;g.forEach(function(o){
+   if(z.tw.some(function(k){return near(o.w,k,o.f)}))best=Math.max(best,2);
+   else if(z.xw.some(function(k){return near(o.w,k,o.f)}))best=Math.max(best,1);
+   else if(z.aw.indexOf(o.w)>=0)best=Math.max(best,.5)});s+=best});
+  if(s>=2&&(z.q!=null||z.type==='tour'))s+=1;
+  // A parita', un capitolo dedicato a un luogo vale piu' di uno che lo cita di passaggio.
+  if(s>0&&z.type==='place'&&z.title.length<=RG[z.k].n.length+14)s+=.5;
+  return {z:z,s:s}}).filter(function(r){return r.s>=1});
+ var max=res.reduce(function(m,r){return Math.max(m,r.s)},0);
+ res=res.filter(function(r){return r.s>=max-1}).sort(function(a,b){return b.s-a.s||rank(a.z,b.z)});
+ // Al massimo due zip dello stesso video tra i risultati, per dare spazio a piu' creator.
+ var per={};res=res.filter(function(r){var n=per[r.z.v.id]=(per[r.z.v.id]||0)+1;return n<=2});
+ return res.slice(0,8).map(function(r){return r.z});
+}
+
+// ---------- Conversazione: domande, risposte e zip nello stesso flusso ----------
+function scrollEnd(){var f=$('feed');f.scrollTop=f.scrollHeight}
+function say(cls,txt){var d=el('div',cls);if(cls==='ma'){d.appendChild(el('i'));var b=el('div',null,txt);d.appendChild(b);$('feed').appendChild(d);scrollEnd();return b}d.textContent=txt;$('feed').appendChild(d);scrollEnd();return d}
+function chips(box,onPick){SUGG.forEach(function(s){var txt=s==='tour'?t('tour'):QN[s].q[lang];var b=el('button','chip',txt);b.type='button';b.onclick=function(){onPick(txt)};box.appendChild(b)})}
+function ask(text,place){
+ text=text.trim();if(!text)return;
+ closeMenu();var w=$('welcome');if(w)w.remove();
+ say('mu',text);$('q').value='';$('send').disabled=true;
+ var r=engine(text),spot=place||findSpot(text),key=function(x){return norm(x).replace(/[^a-z0-9]+/g,' ').trim()},exact=!!place||(spot&&key(text)===key(spot.name));
+ // Un luogo con nome che non e' gia' uno dei segnaposti: lo mostriamo sulla mappa e proponiamo gli zip della sua zona.
+ if(spot&&!place&&RG[A2R[spot.area]]&&norm(RG[A2R[spot.area]].n)===norm(spot.name))spot=null;
+ var ded=[];if(spot&&(exact||!r.some(function(z){return z.type!=='place'}))){var k=A2R[spot.area];ded=ZIPS.filter(function(z){return z.spot===spot&&okLang(z)}).sort(rank);
+  r=ded.concat(k?ZIPS.filter(function(z){return z.k===k&&z.type==='place'&&okLang(z)&&ded.indexOf(z)<0}).sort(rank):[]).slice(0,6)}else if(spot&&r.length)spot=null;
+ rpc('zt_asked',{p_game:GAME,p_lang:lang,p_q:text.slice(0,200),p_found:r.length});
+ if(placeMk){placeMk.remove();placeMk=null}
+ if(spot){
+  var sp=t('spot').split('{n}'),mb=say('ma',sp[0]+spot.name);if(spot.u)mb.appendChild(ni());
+  mb.appendChild(document.createTextNode(sp[1].replace('{s}',spot.sub?' ('+spot.sub+')':'')+(ded.length?' '+t(ded.length===1?'spotD1':'spotD').replace('{c}',ded.length):r.length?' '+t('spotZ').replace('{r}',RG[A2R[spot.area]].n):'')));
+  var det=[spot.cat&&t('cat')[spot.cat],spot.street].filter(Boolean).join(' \u00b7 ');if(det)mb.appendChild(el('div','md',det));
+  if(spot.rw){var rw=el('div','md',t('rw').replace('{w}',spot.rw));rw.appendChild(ni());mb.appendChild(rw)}
+  if(now)closeVideo();showSpot(spot);
+  if(r.length){var bs={el:el('div','res'),list:r,keep:ded.length>0};blocks.push(bs);$('feed').appendChild(bs.el);drawBlock(bs)}
+  scrollEnd();return;
+ }
+ if(!r.length){var b=say('ma',t('none'));var c=el('div','chips');chips(c,ask);b.appendChild(c);scrollEnd();return}
+ var pl=[];r.forEach(function(z){if(z.type==='place'&&pl.indexOf(z.k)<0)pl.push(z.k)});
+ say('ma',t('found').replace('{n}',cnt(r.length)).replace('{p}',pl.length&&pl.length<4?t('on')+pl.map(function(k){return RG[k].n}).join(', '):''));
+ var blk={el:el('div','res'),list:r};blocks.push(blk);$('feed').appendChild(blk.el);drawBlock(blk);
+ play(r[0]);scrollEnd();
+}
+$('form').onsubmit=function(e){e.preventDefault();ask($('q').value)};
+$('q').oninput=function(){$('send').disabled=!this.value.trim()};
+function drawBlock(blk){
+ var box=blk.el;box.innerHTML='';
+ (blk.keep?blk.list:blk.list.slice().sort(rank)).forEach(function(z){
+  var d=el('div','zip'+(now===z?' on':''));d.tabIndex=0;d.setAttribute('role','button');d.setAttribute('aria-label',z.v.who+', '+what(z)+', '+t('from')+mmss(z.s));z['el'+blocks.indexOf(blk)]=d;
+  var th=el('div','th');if(ytOK()){var im=el('img');im.alt='';im.loading='lazy';im.src='https://i.ytimg.com/vi/'+z.v.id+'/mqdefault.jpg';th.appendChild(im)}else th.classList.add('noimg');
+  th.appendChild(el('span',null,mmss(z.s)));
+  var info=el('div'),l1=el('div','l1');l1.appendChild(el('span','who',z.v.who));if(UNV.test(z.title||'')||UNV.test(z.v.t||''))l1.appendChild(ni());l1.appendChild(el('span','what',what(z)));info.appendChild(l1);
+  var m=mode(z.v),meta=el('div','meta');meta.appendChild(el('span','tag'+(m==='n'?' n':''),t('t'+m)));
+  meta.appendChild(document.createTextNode(' · '+mmss(z.e-z.s)+' · '+views(z.v.views)));
+  if(z.v.ai){meta.appendChild(document.createTextNode(' · '));meta.appendChild(el('span','tag n',t('aiT')))}
+  var my=votes[vkey(z)];if(my){meta.appendChild(document.createTextNode(' · '));meta.appendChild(el('span','tag my'+(my<0?' no':''),t(my>0?'my1':'my0')))}
+  info.appendChild(meta);d.appendChild(th);d.appendChild(info);
+  d.onclick=function(){play(z)};d.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();play(z)}};
+  box.appendChild(d);
+ });
+}
+function markOn(){[].forEach.call(document.querySelectorAll('.zip'),function(e){e.classList.remove('on')});blocks.forEach(function(b,i){var e=now&&now['el'+i];if(e&&b.el.contains(e))e.classList.add('on')})}
+
+// ---------- Riproduzione dentro la pagina ----------
+function play(z){
+ now=z;lastKey=undefined;trail.clearLayers();if(placeMk){placeMk.remove();placeMk=null}if(anim){cancelAnimationFrame(anim);anim=null}
+ markOn();paintPins(z.pl);$('live').style.display='none';
+ $('pwrap').style.display='block';paintFb();split(true);if(z.spot)showSpot(z.spot);else if(!z.pl.length)fitAll(true);
+ $('zseg').style.left=(z.s/z.v.len*100)+'%';$('zseg').style.width=((z.e-z.s)/z.v.len*100)+'%';$('zpull').style.left=(z.s/z.v.len*100)+'%';
+ var zl=$('zlab');zl.innerHTML='';zl.appendChild(el('b',null,'Zip '+mmss(z.s)+'–'+mmss(z.e)));zl.appendChild(document.createTextNode(' / '+mmss(z.v.len)));
+ // Il riproduttore incorporato parte sempre con l'audio originale e non permette di cambiarlo:
+ // quando esiste il doppiaggio accendiamo comunque i sottotitoli nella lingua scelta.
+ var m=mode(z.v),force=m==='s'||m==='d',ln=$('lline');
+ ln.className=m==='n'?'warn':'';ln.textContent=t('l'+m);
+ if(location.protocol==='file:'){
+  var box=el('div');box.style.cssText='display:flex;flex-direction:column;justify-content:center;gap:8px;height:100%;padding:16px;font-size:13px;color:var(--mute)';
+  box.appendChild(el('b',null,t('ft')));box.appendChild(el('span',null,t('fbody')));
+  var a=el('a',null,t('fl')+mmss(z.s));a.href='https://www.youtube.com/watch?v='+z.v.id+'&t='+z.s+'s';a.target='_blank';a.rel='noopener';a.style.color='var(--sun)';box.appendChild(a);
+  $('pbox').innerHTML='';$('pbox').appendChild(box);return;
+ }
+ if(!ytOK()){
+  if(player&&player.destroy){try{player.destroy()}catch(e){}}player=null;
+  var yb=el('div','ytask');yb.appendChild(el('span',null,t('ytNeed')));
+  var on=el('button','btn pri',t('ytOn'));on.type='button';on.onclick=function(){setConsent(true)};yb.appendChild(on);
+  var lk=el('a',null,t('ytOpen')+mmss(z.s));lk.href='https://www.youtube.com/watch?v='+z.v.id+'&t='+z.s+'s';lk.target='_blank';lk.rel='noopener';yb.appendChild(lk);
+  $('pbox').innerHTML='';$('pbox').appendChild(yb);return;
+ }
+ if(!window.YT||!YT.Player){pending=z;loadYT();return}
+ if(player&&player.destroy){try{player.destroy()}catch(e){}}
+ $('pbox').innerHTML='<div id="yt"></div>';
+ // Sottotitoli: se la traccia attiva non e' nella lingua scelta, chiede a YouTube la traduzione automatica.
+ function subs(p){
+  if(!force)return;
+  try{var cur=p.getOption('captions','track')||{};
+   if(!cur.languageCode){p.setOption('captions','track',{languageCode:lang});return}
+   var tl=cur.translationLanguage&&cur.translationLanguage.languageCode;
+   if(cur.languageCode.slice(0,2)!==lang&&tl!==lang)p.setOption('captions','track',Object.assign({},cur,{translationLanguage:{languageCode:lang,languageName:T[lang].name}}));
+  }catch(e){}
+ }
+ player=new YT.Player('yt',{host:'https://www.youtube-nocookie.com',videoId:z.v.id,playerVars:{start:z.s,end:z.e,autoplay:1,rel:0,playsinline:1,hl:lang,cc_lang_pref:lang,cc_load_policy:force?1:0},
+  events:{onReady:function(e){subs(e.target)},onApiChange:function(e){subs(e.target)},onStateChange:function(e){if(e.data===1){subs(e.target);setTimeout(function(){subs(e.target)},1500)}}}});
+}
+// Il riproduttore di YouTube si carica solo al primo video, e nella versione che non usa cookie finche' il video non parte.
+var ytAsked=0;function loadYT(){if(ytAsked)return;ytAsked=1;var s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}
+window.onYouTubeIframeAPIReady=function(){if(pending){var z=pending;pending=null;play(z)}};
+// La mappa segue il video: ogni mezzo secondo controlla di quale luogo sta parlando.
+setInterval(function(){
+ if(!player||!player.getCurrentTime||!now)return;
+ var s=player.getCurrentTime(),k='';
+ if(!(s>0))return;
+ $('zpull').style.left=(Math.min(s,now.v.len)/now.v.len*100)+'%';
+ now.v.ch.forEach(function(c){if(s>=c[0])k=c[1]});
+ if(k===lastKey)return;
+ var prev=lastKey;lastKey=k;
+ $('live').style.display=k?'flex':'none';$('livename').textContent=k?RG[k].n:'';
+ Object.keys(pins).forEach(function(p){pins[p].classList.toggle('live',p===k)});
+ if(k&&prev&&prev!==k&&now.pl.length>1)travel(prev,k);
+ else if(follow){if(k)flyTo(k);else if(prev!==undefined)fitAll(true)}
+},500);
+
+// ---------- Menu "+" ----------
+function closeMenu(){$('menu').classList.remove('open');$('plus').setAttribute('aria-expanded','false')}
+$('plus').onclick=function(e){e.stopPropagation();var mn=$('menu');paintMenu();mn.classList.remove('down');var o=mn.classList.toggle('open');$('plus').setAttribute('aria-expanded',o);
+ if(o&&$('form').getBoundingClientRect().top<mn.offsetHeight+20)mn.classList.add('down')};
+document.addEventListener('click',function(e){if(!$('menu').contains(e.target)&&e.target!==$('plus'))closeMenu()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenu()});
+$('miFollow').onclick=function(){follow=!follow;store.set('zt_follow',follow);paintMenu();if(follow&&lastKey)flyTo(lastKey)};
+$('miShield').onclick=function(){shield=!shield;store.set('zt_shield',shield);paintMenu()};
+$('miCopy').onclick=function(){if(!now)return;var u='https://youtu.be/'+now.v.id+'?t='+now.s,b=$('mlCopy');
+ function done(x){b.textContent=x;setTimeout(function(){b.textContent=t('copy')},1600)}
+ try{navigator.clipboard.writeText(u).then(function(){done(t('copied'))},function(){done(u)})}catch(e){done(u)}};
+$('miNew').onclick=function(){
+ closeMenu();blocks=[];
+ closeVideo();
+ $('feed').innerHTML='<div id="welcome"><div class="eyebrow" id="claim"></div><h2 id="heroT"></h2><p id="heroP"></p><div class="chips" id="sugg"></div></div>';applyLang();paintPins(null);fitAll(true)};
+function paintMenu(){
+ $('miFollow').setAttribute('aria-checked',follow);$('miShield').setAttribute('aria-checked',shield);document.body.classList.toggle('shield',shield);
+ $('miCopy').setAttribute('aria-disabled',!now);
+ var box=$('langs');box.innerHTML='';
+ Object.keys(T).forEach(function(k){var b=el('button',null,k.toUpperCase());b.type='button';b.title=T[k].name;b.setAttribute('aria-pressed',k===lang);
+  b.onclick=function(e){e.stopPropagation();lang=k;store.set('zt_lang',k);applyLang();if(now)play(now)};box.appendChild(b)});
+}
+function applyLang(){
+ document.documentElement.lang=lang;
+ [['mlLang','lang'],['mlFollow','follow'],['mdFollow','dFollow'],['mlShield','shield'],['mdShield','dShield'],['mlCopy','copy'],['mlNew','newc'],['livelbl','live'],['fbq','fbq'],['fbY','yes'],['fbN','no']].forEach(function(p){$(p[0]).textContent=t(p[1])});
+ if($('welcome')){$('claim').textContent=t('claim');$('heroT').textContent=t('heroT');$('heroP').textContent=t('heroP');$('sugg').innerHTML='';chips($('sugg'),ask)}
+ $('foot').innerHTML='';$('foot').appendChild(el('div','by',t('by')));var dt=el('details'),sm=el('summary',null,t('info'));dt.appendChild(sm);var fp=el('p',null,t('foot')+t('footMap'));fp.appendChild(ni());dt.appendChild(fp);var fl=el('div','links');fl.appendChild(dt);$('foot').appendChild(fl);[['legal','privacy'],['prefsL','cookie']].forEach(function(p){var b=el('button','lnk',t(p[0]));b.type='button';b.onclick=function(){openLegal(p[1])};fl.appendChild(b)});$('mlLegal').textContent=t('legal');
+ $('q').placeholder=t('ph');$('q').setAttribute('aria-label',t('ph'));$('plus').setAttribute('aria-label',t('more'));$('close').setAttribute('aria-label',t('closeV'));$('close').title=t('closeV');$('send').setAttribute('aria-label',t('send'));
+ paintMenu();blocks.forEach(drawBlock);markOn();
+ if(now){var m=mode(now.v);$('lline').textContent=t('l'+m)}
+ if(!$('consent').hidden)showConsent();if(!$('legal').hidden)fillLegal();
+}
+
+
+// ---------- Schermo diviso ----------
+function split(on){
+ var was=document.body.classList.contains('playing');if(was===on)return;
+ document.body.classList.toggle('playing',on);map.invalidateSize({pan:false});
+ if(!on)fitAll(true);
+}
+function closeVideo(){
+ if(player&&player.destroy){try{player.destroy()}catch(e){}}player=null;now=null;lastKey=undefined;
+ if(anim){cancelAnimationFrame(anim);anim=null}trail.clearLayers();if(placeMk){placeMk.remove();placeMk=null}
+ $('pbox').innerHTML='<div id="yt"></div>';$('pwrap').style.display='none';$('live').style.display='none';
+ markOn();paintPins(null);split(false);
+}
+$('close').onclick=closeVideo;
+// ---------- Consenso e testi legali ----------
+// Finche' non c'e' una scelta, o se la scelta e' "solo il necessario", il sito non contatta YouTube:
+// niente anteprime e niente riproduttore. La scelta vale 6 mesi, poi si richiede.
+function ytOK(){return !!(consent&&consent.v===LG.version&&consent.yt)}
+function setConsent(yt){
+ consent={v:LG.version,yt:!!yt,at:Date.now()};store.set('zt_consent',consent);$('consent').hidden=true;
+ blocks.forEach(drawBlock);markOn();if(!$('legal').hidden)fillLegal();
+ if(now)play(now);
+}
+function showConsent(){['cTitle','cText','cYes','cNo','cMore'].forEach(function(k){$(k).textContent=t(k)});$('cX').setAttribute('aria-label',t('cNo'));$('cX').title=t('cNo');$('consent').hidden=false}
+$('cYes').onclick=function(){setConsent(true)};$('cNo').onclick=$('cX').onclick=function(){setConsent(false)};$('cMore').onclick=function(){openLegal('cookie')};
+function forget(){
+ var d=device;votes={};device=null;store.del('zt_votes3');store.del('zt_device');paintFb();blocks.forEach(drawBlock);markOn();
+ return (d?rpc('zt_forget',{p_device:d}):Promise.resolve(null)).then(function(){if(CFG.supabaseUrl)loadTotals()});
+}
+function prefsBox(done){
+ var box=el('div','prefs');
+ function row(title,desc,on,fixed,act){var r=el('div','prow'),sp=el('span');sp.appendChild(el('b',null,title));sp.appendChild(el('small',null,desc));r.appendChild(sp);
+  var b=el('button','swb');b.type='button';b.setAttribute('role','switch');b.setAttribute('aria-checked',on);b.setAttribute('aria-label',title);b.appendChild(el('i','sw'));if(fixed)b.disabled=true;else b.onclick=act;r.appendChild(b);box.appendChild(r)}
+ row(t('pNec'),t('pNecD'),true,true);
+ row(t('pYt'),t('pYtD'),ytOK(),false,function(){setConsent(!ytOK())});
+ var r=el('div','prow'),sp=el('span');sp.appendChild(el('small',null,t('pCode')));sp.appendChild(el('span','pcode',device||t('pNoCode')));r.appendChild(sp);
+ var del=el('button','btn',t('pDel'));del.type='button';del.onclick=function(){forget().then(function(){lgDone=true;fillLegal()})};r.appendChild(del);box.appendChild(r);
+ if(done)box.appendChild(el('div','pmsg',t('pDone')));
+ return box;
+}
+var lgTab='privacy',lgBack=null,lgDone=false,LGTABS=['privacy','cookie','terms','ai'];
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fillLegal(){
+ var L=LG[lang]||LG.en;if(!L)return;
+ var c=CFG.legal||{},mail=c.email?'<a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>':'<b>[\u2026]</b>';
+ var val={controller:esc(c.controller||'AXIX'),address:c.address?', '+esc(c.address):'',vat:c.vat?', '+esc(c.vat):'',email:mail,host:esc(c.host||'hosting'),db:esc(c.db||'database'),tm:c.tm?L.tm.replace('{n}',esc(c.tm)):''};
+ var tabs=$('lgTabs');tabs.innerHTML='';
+ LGTABS.forEach(function(k){var b=el('button',null,L.tabs[k]);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-pressed',k===lgTab);b.setAttribute('aria-selected',k===lgTab);
+  b.onclick=function(){lgTab=k;lgDone=false;fillLegal();$('lgBody').scrollTop=0;try{history.replaceState(null,'',location.pathname+location.search+'#'+k)}catch(e){}};tabs.appendChild(b)});
+ var body=$('lgBody');
+ body.innerHTML=(c.email?'':'<p class="draft">'+L.draft+'</p>')+L[lgTab].replace(/\{(\w+)\}/g,function(m,k){return val[k]!=null?val[k]:m})+
+  '<p class="upd">'+L.upd+new Date(LG.updated+'T12:00:00').toLocaleDateString(T[lang].loc,{day:'numeric',month:'long',year:'numeric'})+'</p>';
+ if(lgTab==='cookie'){var h=body.querySelector('h2');h.parentNode.insertBefore(prefsBox(lgDone),h.nextSibling)}
+ $('lgBox').setAttribute('aria-label',L.tabs[lgTab]);$('lgX').setAttribute('aria-label',t('closeL'));$('lgX').title=t('closeL');
+}
+function openLegal(tab){closeMenu();if(LGTABS.indexOf(tab)>=0)lgTab=tab;lgDone=false;lgBack=document.activeElement;$('legal').hidden=false;fillLegal();$('lgBody').scrollTop=0;$('lgBody').focus()}
+function closeLegal(){$('legal').hidden=true;try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}if(lgBack&&lgBack.focus)lgBack.focus()}
+$('lgX').onclick=closeLegal;$('legal').addEventListener('click',function(e){if(e.target===$('legal'))closeLegal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('legal').hidden)closeLegal()});
+$('miLegal').onclick=function(){openLegal('privacy')};
+// ---------- Avvio ----------
+applyLang();fitAll(false);loadTotals();
+if(!consent||consent.v!==LG.version||Date.now()-consent.at>183*864e5)showConsent();
+function hashLegal(){var h=location.hash.slice(1);if(LGTABS.indexOf(h)>=0&&($('legal').hidden||lgTab!==h))openLegal(h)}
+hashLegal();window.addEventListener('hashchange',hashLegal);
+
+</script>
+</body>
+</html>
