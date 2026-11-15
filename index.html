@@ -260,6 +260,9 @@ body.playing #feed{flex:1 1 auto}
  #lyBtn{left:auto;bottom:auto;right:10px;top:12px}
  #ly{left:8px;right:8px;bottom:auto;top:54px;width:auto;max-width:none;max-height:50vh;overflow:hidden}
  .lylg{display:none}
+ /* Elenco dei luoghi aperto mentre c'e' un video: il video cede spazio, e se lo spazio resta poco spariscono i filtri secondari. */
+ body.lyopen.playing #side{max-height:46vh}
+ #ly.tight .chips,#ly.tight .lyso{display:none}
  /* Su telefono, mentre un video e' aperto, lo spazio va al video e agli zip: note e crediti tornano alla chiusura. */
  body.playing .foot{display:none}
  /* Benvenuto su telefono: domande e argomenti su una riga che scorre di lato, cosi' la mappa resta grande. */
@@ -965,8 +968,12 @@ function paintLayers(){
  var lg=el('div','lylg');[['z',t('lgZ')],['v',t('lgV')],['u',t('lgU')]].forEach(function(r){var s=el('span');s.appendChild(el('i','dot '+r[0]));s.appendChild(document.createTextNode(r[1]));if(r[0]==='u')s.appendChild(ni());lg.appendChild(s)});box.appendChild(lg);
  lyPaintState();lyList();
 }
-function closeLayers(){$('ly').hidden=true;$('lyBtn').setAttribute('aria-expanded','false')}
-function openLayers(){paintLayers();$('ly').hidden=false;$('lyBtn').setAttribute('aria-expanded','true');if(wide()&&!now&&map.getZoom()<3.2)fitAll(true)}
+function closeLayers(){document.body.classList.remove('lyopen');$('ly').hidden=true;$('lyBtn').setAttribute('aria-expanded','false')}
+// Su telefono l'elenco dei luoghi occupa solo lo spazio sopra il pannello della chat o del video: i due non si sovrappongono mai.
+function lyFit(){var l=$('ly');if(l.hidden)return;if(wide()){l.style.maxHeight='';l.classList.remove('tight');return}var a=Math.max(150,Math.round($('side').getBoundingClientRect().top)-54-8);l.style.maxHeight=a+'px';l.classList.toggle('tight',a<320)}
+if(window.ResizeObserver)new ResizeObserver(lyFit).observe($('side'));
+window.addEventListener('resize',lyFit);
+function openLayers(){paintLayers();$('ly').hidden=false;document.body.classList.add('lyopen');lyFit();$('lyBtn').setAttribute('aria-expanded','true');if(wide()&&!now&&map.getZoom()<3.2)fitAll(true)}
 $('lyBtn').onclick=function(e){e.stopPropagation();if($('ly').hidden)openLayers();else closeLayers()};
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('ly').hidden&&document.activeElement!==$('lyQ'))closeLayers()});
 map.on('moveend',function(){if(!$('ly').hidden&&LYF.so==='near')lyList()});
