@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simone Paciaroni · ZipTube</title>
+<meta name="description" content="Simone Paciaroni: gamer e maker di intelligenza artificiale, membro della Apply AI Alliance della Commissione europea. ZipTube, MicrobiOrbit, startup.gratis, HACCP for AI, H-BENCH e AXIX.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='16 16 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='zg' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0.05' stop-color='%234d5dd7'/%3E%3Cstop offset='0.22' stop-color='%238f55cd'/%3E%3Cstop offset='0.3' stop-color='%23b152ca'/%3E%3Cstop offset='0.45' stop-color='%23ff4cb0'/%3E%3Cstop offset='0.61' stop-color='%23fa6396'/%3E%3Cstop offset='0.68' stop-color='%23f56b85'/%3E%3Cstop offset='0.85' stop-color='%23ec825b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='16' y='16' width='160' height='160' rx='35' fill='url(%23zg)'/%3E%3Cpath d='M53 55H138L55 132H134' fill='none' stroke='%23ffffff' stroke-width='21' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M78 50v10m31-10v10M91 127v10' fill='none' stroke='%23150c2e' stroke-width='6.5' stroke-linecap='round'/%3E%3Ccircle cx='134' cy='132' r='16' fill='%23ffffff'/%3E%3Ccircle cx='134' cy='132' r='10' fill='%23ff4cb0'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Space Grotesk";src:url(/vendor/fonts/space-grotesk-latin-700-normal.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Space Grotesk";src:url(/vendor/fonts/space-grotesk-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:Inter;src:url(/vendor/fonts/inter-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Inter;src:url(/vendor/fonts/inter-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap}
+:root{--ink:#150c2e;--sub:#5b5378;--line:#ebe5f6;--soft:#f7f4fd;--pink:#ff4cb0;--plum:#5a2d91;--indigo:#2e2a8f;
+--gradx:linear-gradient(90deg,#4d5dd7 5%,#8f55cd 22%,#b152ca 30%,#ff4cb0 45%,#fa6396 61%,#f56b85 68%,#ec825b 85%);
+--grad:linear-gradient(135deg,#4d5dd7 0%,#8f55cd 25%,#ff4cb0 55%,#f56b85 75%,#ec825b 100%)}
+*{box-sizing:border-box;min-width:0}
+html{color-scheme:light}
+body{margin:0;background:#fff;color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+.bar{height:6px;background:var(--gradx)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1000px;margin:0 auto;padding:20px 20px 0}
+.logo{display:flex;align-items:center;gap:10px;font:700 21px/1 "Space Grotesk",sans-serif;letter-spacing:-.035em;text-decoration:none}
+.logo svg{flex:none}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px}
+.lang button{font:600 13px/1 Inter,sans-serif;color:var(--sub);background:none;border:0;border-radius:999px;padding:9px 13px;min-height:36px;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--ink);color:#fff}
+a:focus-visible,button:focus-visible{outline:2px solid var(--pink);outline-offset:3px;border-radius:8px}
+main{max-width:1000px;margin:0 auto;padding:30px 20px 48px}
+.hero{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:44px;align-items:center}
+.pic{position:relative;border-radius:28px;padding:5px;background:var(--grad);box-shadow:0 24px 60px rgba(90,45,145,.22)}
+.pic img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:24px;background:#f3eefc}
+.pic .mono{display:grid;place-items:center;aspect-ratio:1;border-radius:24px;background:radial-gradient(120% 90% at 80% 10%,rgba(255,255,255,.28),transparent 60%),linear-gradient(160deg,#2e2a8f 0%,#5a2d91 55%,#150c2e 100%);color:#fff;font:700 clamp(96px,16vw,168px)/1 "Space Grotesk",sans-serif;letter-spacing:-.05em}
+.pic span{position:absolute;left:18px;bottom:18px;font:600 12px/1 Inter,sans-serif;background:rgba(255,255,255,.92);color:var(--ink);padding:8px 11px;border-radius:999px}
+.kick{font:600 14px/1.3 Inter,sans-serif;color:var(--plum);margin:0 0 10px}
+h1{font:700 clamp(40px,7vw,64px)/1 "Space Grotesk",sans-serif;letter-spacing:-.035em;margin:0;text-wrap:balance}
+.role{font:700 clamp(22px,3.2vw,30px)/1.15 "Space Grotesk",sans-serif;letter-spacing:-.02em;margin:14px 0 0;background:var(--gradx);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.line{font-size:18px;color:var(--sub);margin:16px 0 0;max-width:34ch}
+.badge{display:inline-flex;align-items:center;gap:10px;margin:18px 0 0;padding:10px 16px 10px 12px;border-radius:14px;background:#eef1ff;border:1px solid #d9def9;font:600 14px/1.35 Inter,sans-serif;color:#1f2a8a}
+.badge i{flex:none;width:10px;height:10px;border-radius:50%;background:#3a4fd6;box-shadow:0 0 0 4px rgba(58,79,214,.15)}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;padding:0;list-style:none}
+.tags li{font:600 13px/1 Inter,sans-serif;padding:9px 13px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 0}
+.links a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;text-decoration:none;font:600 15px/1 Inter,sans-serif;border:1px solid var(--line);background:#fff}
+.links a.main{background:var(--ink);color:#fff;border-color:var(--ink)}
+.links a:hover{border-color:var(--plum)}
+h2{font:700 28px/1.1 "Space Grotesk",sans-serif;letter-spacing:-.02em;margin:64px 0 20px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:22px;padding:22px 22px 18px;background:#fff;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
+.card::before{content:"";position:absolute;left:22px;right:22px;top:0;height:4px;border-radius:0 0 4px 4px;background:var(--gradx);opacity:.9}
+.card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(46,42,143,.12)}
+.card small{font:600 12px/1 Inter,sans-serif;color:var(--plum);text-transform:none;margin:6px 0 10px}
+.card h3{font:700 22px/1.15 "Space Grotesk",sans-serif;letter-spacing:-.015em;margin:4px 0 0}
+.card p{margin:0;color:var(--sub);font-size:15px;flex:1}
+.card em{font-style:normal;font:600 14px/1 Inter,sans-serif;margin-top:16px;color:var(--ink)}
+.card em::after{content:" \2192"}
+footer{max-width:1000px;margin:0 auto;padding:0 20px 34px;color:#857da1;font-size:12.5px;line-height:1.5}
+@media(max-width:860px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.hero{grid-template-columns:1fr;gap:26px}.pic{max-width:340px}.grid{grid-template-columns:1fr}h2{margin-top:48px}}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<header class="top">
+ <a class="logo" href="/games/gta-6" aria-label="ZipTube"><svg width="34" height="34" viewBox="16 16 160 160" aria-hidden="true"><defs><linearGradient id="zg" x1="0" y1="0" x2="0" y2="1"><stop offset=".05" stop-color="#4d5dd7"/><stop offset=".22" stop-color="#8f55cd"/><stop offset=".3" stop-color="#b152ca"/><stop offset=".45" stop-color="#ff4cb0"/><stop offset=".61" stop-color="#fa6396"/><stop offset=".68" stop-color="#f56b85"/><stop offset=".85" stop-color="#ec825b"/></linearGradient></defs><rect x="16" y="16" width="160" height="160" rx="35" fill="url(#zg)"/><path d="M53 55H138L55 132H134" fill="none" stroke="#fff" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/><path d="M78 50v10m31-10v10M91 127v10" fill="none" stroke="#150c2e" stroke-width="6.5" stroke-linecap="round"/><circle cx="134" cy="132" r="16" fill="#fff"/><circle cx="134" cy="132" r="10" fill="#ff4cb0"/></svg>ZipTube</a>
+ <div class="lang" role="group" aria-label="Lingua / Language"><button type="button" data-l="it" aria-pressed="true">IT</button><button type="button" data-l="en" aria-pressed="false">EN</button></div>
+</header>
+<main>
+ <section class="hero">
+  <div class="pic"><div class="mono" aria-hidden="true">SP</div><span>Player 1</span></div>
+  <div>
+   <p class="kick" data-t="kick"></p>
+   <h1>Simone Paciaroni</h1>
+   <p class="role" data-t="role"></p>
+   <p class="line" data-t="line"></p>
+   <p class="badge"><i aria-hidden="true"></i><span data-t="eu"></span></p>
+   <ul class="tags" data-list="tags"></ul>
+   <nav class="links" aria-label="Link">
+    <a class="main" href="/games/gta-6" data-t="try"></a>
+    <a href="https://www.linkedin.com/in/simonepaciaroni" rel="noopener">LinkedIn</a>
+    <a href="https://x.com/ZipTubeTV" rel="noopener">X @ZipTubeTV</a>
+   </nav>
+  </div>
+ </section>
+ <h2 data-t="projT"></h2>
+ <div class="grid" id="grid"></div>
+</main>
+<footer data-t="foot"></footer>
+<script>
+{
+const P=[
+ {n:'ZipTube',u:'/games/gta-6',k:{it:'Gaming · AI',en:'Gaming · AI'},d:{it:'Fai una domanda e parte il minuto esatto del video giusto, con la mappa che segue quello che vedi. Si parte da GTA 6.',en:'Ask a question and the exact minute of the right video plays, with a map that follows what you see. Starting with GTA 6.'},c:{it:'Gioca ora',en:'Play now'}},
+ {n:'MicrobiOrbit',u:'https://microbiorbit.com',k:{it:'Videogioco',en:'Video game'},d:{it:'Il suo gioco per browser, con classifica online. Si gioca subito, senza installare niente.',en:'His browser game, with an online leaderboard. Play right away, nothing to install.'},c:{it:'Gioca',en:'Play'}},
+ {n:'startup.gratis',u:'https://startup.gratis',k:{it:'AI',en:'AI'},d:{it:'Descrivi un’idea in poche righe e l’AI ti restituisce mercato, concorrenti e prossimi passi.',en:'Describe an idea in a few lines and AI gives you the market, competitors and next steps.'},c:{it:'Prova la tua idea',en:'Test your idea'}},
+ {n:'HACCP for AI',u:'https://doi.org/10.5281/zenodo.20672143',k:{it:'AI safety',en:'AI safety'},d:{it:'Uno standard verificabile per l’autocontrollo dell’intelligenza artificiale: il metodo HACCP applicato ai sistemi AI. White paper aperto.',en:'An auditable self-control standard for artificial intelligence: the HACCP method applied to AI systems. Open white paper.'},c:{it:'Leggi il white paper',en:'Read the white paper'}},
+ {n:'H-BENCH',u:'https://axix.com',k:{it:'Benchmark AI',en:'AI benchmark'},d:{it:'Il banco di prova di AXIX per mettere alla prova i modelli di intelligenza artificiale.',en:'AXIX’s test bench for putting AI models through their paces.'},c:{it:'Scopri di più',en:'Learn more'}},
+ {n:'AXIX',u:'https://axix.com',k:{it:'Il marchio',en:'The brand'},d:{it:'Il marchio che firma i suoi progetti di intelligenza artificiale, con un’idea fissa: AI safety first.',en:'The brand behind his artificial intelligence projects, built on one idea: AI safety first.'},c:{it:'Scopri AXIX',en:'Discover AXIX'}}
+];
+const T={
+ it:{kick:'Chi c’è dietro ZipTube',role:'Gamer e maker di intelligenza artificiale',line:'Costruisce con l’AI le cose che vorrebbe usare da giocatore.',projT:'Progetti',eu:'Membro della Apply AI Alliance della Commissione europea',try:'Prova ZipTube',alt:'Ritratto illustrato di Simone Paciaroni',
+  tags:['Intelligenza artificiale','AI safety','Gaming','GTA 6','Giochi per browser','Benchmark AI'],foot:'ZipTube è un prodotto AXIX®. Sito non ufficiale, non affiliato a Rockstar Games o Take-Two.'},
+ en:{kick:'The person behind ZipTube',role:'Gamer and AI maker',line:'He builds with AI the things he’d want to use as a player.',projT:'Projects',eu:'Member of the European Commission’s Apply AI Alliance',try:'Try ZipTube',alt:'Illustrated portrait of Simone Paciaroni',
+  tags:['Artificial intelligence','AI safety','Gaming','GTA 6','Browser games','AI benchmarks'],foot:'ZipTube is an AXIX® product. Unofficial site, not affiliated with Rockstar Games or Take-Two.'}
+};
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function get(){try{const q=new URLSearchParams(location.search).get('lang');if(T[q])return q;const s=JSON.parse(localStorage.getItem('zt_lang')||'null');if(T[s])return s}catch(e){}return (navigator.language||'en').slice(0,2)==='it'?'it':'en'}
+function put(l){
+ document.documentElement.lang=l;
+ document.querySelectorAll('[data-t]').forEach(e=>{e.textContent=T[l][e.dataset.t]});
+ document.querySelectorAll('[data-list]').forEach(e=>{e.innerHTML=T[l][e.dataset.list].map(x=>'<li>'+esc(x)+'</li>').join('')});
+ const im=document.querySelector('.pic img');if(im)im.alt=T[l].alt;
+ document.getElementById('grid').innerHTML=P.map(p=>{const ext=/^https?:/.test(p.u);return '<a class="card" href="'+p.u+'"'+(ext?' rel="noopener"':'')+'><h3>'+esc(p.n)+'</h3><small>'+esc(p.k[l])+'</small><p>'+esc(p.d[l])+'</p><em>'+esc(p.c[l])+'</em></a>'}).join('');
+ document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===l));
+ try{localStorage.setItem('zt_lang',JSON.stringify(l))}catch(e){}
+}
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>put(b.dataset.l)));
+put(get());
+}
+</script>
+</body>
+</html>
